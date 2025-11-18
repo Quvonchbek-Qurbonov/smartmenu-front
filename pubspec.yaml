@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.9
   cupertino_icons: ^1.0.2
   go_router: ^14.0.0
   intl: ^0.20.2
@@ -17,13 +18,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  google_maps_flutter: ^2.5.0
 
 flutter:
   uses-material-design: true
 
-  # assets:
-  #   - images/
-  #   - assets/
+  assets:
+      - assets/bottombar/catalog.svg
+      - assets/bottombar/orders.svg
+      - assets/bottombar/scaner.svg
+      - assets/bottombar/smart-home.svg
+      - assets/bottombar/user.svg
 
   # fonts:
   #   - family: Schyler

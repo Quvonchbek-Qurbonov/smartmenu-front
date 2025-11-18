@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../screens/home/home_screen.dart';
+import 'package:my_flutter_app/screens/catalog/Menu.dart';
+import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
+import 'package:my_flutter_app/screens/home/HomePage.dart';
+import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
 import 'route_names.dart';
@@ -27,17 +30,30 @@ class AppRouter {
         name: RouteNames.settings,
         builder: (context, state) => const SettingsScreen(),
       ),
-
-
-      // Example route with parameters
-      // GoRoute(
-      //   path: '${RouteNames.details}/:id',
-      //   name: RouteNames.details,
-      //   builder: (context, state) {
-      //     final id = state.pathParameters['id'] ?? '';
-      //     return DetailsScreen(id: id);
-      //   },
-      // ),
+      GoRoute(
+        path: RouteNames.catalog,
+        name: RouteNames.catalog,
+        builder: (context, state) => const CatalogPage(),
+      ),
+      // Restaurant Detail Route with Path Parameters
+      GoRoute(
+        path: '${RouteNames.menu}/:restaurantId/:restaurantName',
+        name: RouteNames.menu,
+        builder: (context, state) {
+          final restaurantId = state.pathParameters['restaurantId'] ?? '';
+          final restaurantName = state.pathParameters['restaurantName'] ?? '';
+          
+          return RestaurantDetailPage(
+            restaurantId: restaurantId,
+            restaurantName: restaurantName,
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.Home,
+        name: RouteNames.Home,
+        builder: (context, state) => const MenuSnapHomePage(),
+      ),
     ],
 
     // Error page
