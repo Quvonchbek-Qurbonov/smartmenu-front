@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
+import 'package:my_flutter_app/screens/profile/profile_screen.dart';
 import 'package:my_flutter_app/widgets/common/BottomBar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Center(child: CatalogPage()),
     Center(child: Text("Scan Page")),
     Center(child: Text("Smart Home Page")),
-    Center(child: Text("Profile Page")),
+    Center(child: ProfileScreen()),
   ];
 
   @override

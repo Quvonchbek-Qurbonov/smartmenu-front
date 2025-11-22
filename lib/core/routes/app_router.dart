@@ -42,7 +42,7 @@ class AppRouter {
         builder: (context, state) {
           final restaurantId = state.pathParameters['restaurantId'] ?? '';
           final restaurantName = state.pathParameters['restaurantName'] ?? '';
-          
+
           return RestaurantDetailPage(
             restaurantId: restaurantId,
             restaurantName: restaurantName,
