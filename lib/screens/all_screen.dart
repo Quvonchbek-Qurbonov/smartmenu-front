@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
+import 'package:my_flutter_app/screens/profile/about.dart';
+import 'package:my_flutter_app/screens/profile/edit_profile.dart';
+import 'package:my_flutter_app/screens/profile/policy.dart';
 import 'package:my_flutter_app/screens/profile/profile_screen.dart';
+import 'package:my_flutter_app/screens/profile/terms.dart';
 import 'package:my_flutter_app/widgets/common/BottomBar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,6 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Center(child: Text("Scan Page")),
     Center(child: Text("Smart Home Page")),
     Center(child: ProfileScreen()),
+    Center(child: AboutScreen()),
+    Center(child: PrivacyPolicyScreen()),
+    Center(child: TermsConditionsScreen()),
+    Center(child: EditProfileScreen()),
   ];
 
   @override
