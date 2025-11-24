@@ -28,148 +28,65 @@ class MenuItemCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 130,
-        height: 200, // FIXED HEIGHT
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(
-          
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          
-          children: [
-            // FIXED IMAGE
-            Container(
-              width: double.infinity,
-              height: 120,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: const Color(0xFFF9F9F9),
-              ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.restaurant, size: 40, color: Colors.grey),
-              ),
-            ),
-
-            //const SizedBox(height: 8),
-
-            // NAME (max 2 lines, clipped)
-            Text(
-              name,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF131316),
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w400,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis, // ⛔ prevents entering more text
-            ),
-
-            //const SizedBox(height: 6),
-
-            // PRICE
-            Text(
-              price,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF875BF7),
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-
-             // pushes button to bottom
-            
-            
-            Center(child: _buildQuantityControl()
-            ),
-
-            //const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // QUANTITY CONTROL
-  Widget _buildQuantityControl() {
-    if (quantity > 0) {
-      return Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9F9F9),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            GestureDetector(
-              onTap: () {
-                if (onRemove != null) onRemove!(id);
-              },
-              child: Container(
-                width: 28,
-                height: 28,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // IMAGE
+              Container(
+                width: double.infinity,
+                height: 120,
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF9F9F9),
                 ),
-                child: const Icon(Icons.remove, size: 22, color: Color(0xFF6B6B6B)),
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            Text(
-              '$quantity',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF131316),
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            GestureDetector(
-              onTap: () => onAdd(id),
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.restaurant, size: 40, color: Colors.grey),
                 ),
-                child: const Icon(Icons.add, size: 22, color: Color(0xFF6B6B6B)),
               ),
-            ),
-          ],
-        ),
-      );
-    }
 
-    // ADD BUTTON ONLY
-    return GestureDetector(
-      onTap: () => onAdd(id),
-      child: Container(
-        height: 36,
-        width: double.maxFinite,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9F9F9),
-          borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 8),
+
+              // NAME (max 2 lines, clipped)
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF131316),
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 4),
+
+              // PRICE
+              Text(
+                price,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF875BF7),
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-        child: const Icon(Icons.add, size: 24, color: Color(0xFF6B6B6B)),
       ),
     );
   }
