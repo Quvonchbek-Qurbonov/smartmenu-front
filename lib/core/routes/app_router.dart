@@ -8,6 +8,7 @@ import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
 import 'route_names.dart';
+import '../../screens/payment/payment_screen.dart';
 
 class AppRouter {
   // Private constructor to prevent instantiation
@@ -55,10 +56,16 @@ class AppRouter {
           );
         },
       ),
+      
       GoRoute(
         path: RouteNames.Home,
         name: RouteNames.Home,
         builder: (context, state) => const MenuSnapHomePage(),
+      ),
+      GoRoute(
+        path: RouteNames.payment,
+        name: RouteNames.payment,
+        builder: (context, state) => const PaymentScreen(orderId: '1', orderDetails: const {'description': 'bla bla'}, totalAmount: 32),
       ),
     ],
 
