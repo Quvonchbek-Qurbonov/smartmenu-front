@@ -40,6 +40,22 @@ class AppRouter {
         name: RouteNames.catalog,
         builder: (context, state) => const CatalogPage(),
       ),
+      GoRoute(
+        path: RouteNames.about,
+        name: RouteNames.about,
+        builder: (context, state) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.policy,
+        name: RouteNames.policy,
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.terms,
+        name: RouteNames.terms,
+        builder: (context, state) => const TermsConditionsScreen(),
+      ),
+
       // GoRoute(
       //   path: RouteNames.qrcodeScan,
       //   name: RouteNames.qrcodeScan,
@@ -59,7 +75,7 @@ class AppRouter {
           );
         },
       ),
-      
+
       GoRoute(
         path: RouteNames.Home,
         name: RouteNames.Home,
