@@ -11,6 +11,7 @@ import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
 import 'route_names.dart';
+import '../../screens/payment/payment_screen.dart';
 
 class AppRouter {
   // Private constructor to prevent instantiation
@@ -58,36 +59,24 @@ class AppRouter {
           );
         },
       ),
+      
       GoRoute(
         path: RouteNames.Home,
         name: RouteNames.Home,
         builder: (context, state) => const MenuSnapHomePage(),
       ),
       GoRoute(
-        path: RouteNames.about,
-        name: RouteNames.about,
-        builder: (context, state) => const AboutScreen(),
+        path: RouteNames.payment,
+        name: RouteNames.payment,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PaymentScreen(
+            orderId: extra?['orderId'] ?? '',
+            totalAmount: extra?['totalAmount'] ?? 0.0,
+            orderDetails: extra?['orderDetails'] ?? {},
+          );
+        },
       ),
-      GoRoute(
-        path: RouteNames.policy,
-        name: RouteNames.policy,
-        builder: (context, state) => const PrivacyPolicyScreen(),
-      ),
-      GoRoute(
-        path: RouteNames.terms,
-        name: RouteNames.terms,
-        builder: (context, state) => const TermsConditionsScreen(),
-      ),
-      GoRoute(
-        path: RouteNames.edit_profile,
-        name: RouteNames.edit_profile,
-        builder: (context, state) => const EditProfileScreen(),
-      ),
-      // GoRoute(
-      //   path: RouteNames.appereance,
-      //   name: RouteNames.appereance,
-      //   builder: (context, state) => const Appear(),
-      // ),
     ],
 
     // Error page
