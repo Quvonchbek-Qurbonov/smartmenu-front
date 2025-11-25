@@ -83,6 +83,11 @@ class AppRouter {
         name: RouteNames.edit_profile,
         builder: (context, state) => const EditProfileScreen(),
       ),
+      // GoRoute(
+      //   path: RouteNames.appereance,
+      //   name: RouteNames.appereance,
+      //   builder: (context, state) => const Appear(),
+      // ),
     ],
 
     // Error page
