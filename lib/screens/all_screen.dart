@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
 import 'package:my_flutter_app/screens/orders/OrderPage.dart';
+import 'package:my_flutter_app/screens/profile/profile_screen.dart';
 import 'package:my_flutter_app/widgets/common/BottomBar.dart';
 import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
 
@@ -21,8 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Center(child: MenuSnapHomePage()),
     Center(child: CatalogPage()),
     Center(child: QRCodeScanScreen()),
-    Center(child: OrdersPage()),
-    Center(child: Text("Profile Page")),
+    Center(child: OrdersPage(),),
+    Center(child: ProfileScreen()),
+    
+
   ];
 
   @override

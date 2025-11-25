@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:my_flutter_app/screens/catalog/Menu.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
-import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
+import 'package:my_flutter_app/screens/profile/about.dart';
+import 'package:my_flutter_app/screens/profile/edit_profile.dart';
+import 'package:my_flutter_app/screens/profile/policy.dart';
+import 'package:my_flutter_app/screens/profile/terms.dart';
 import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
@@ -49,7 +52,7 @@ class AppRouter {
         builder: (context, state) {
           final restaurantId = state.pathParameters['restaurantId'] ?? '';
           final restaurantName = state.pathParameters['restaurantName'] ?? '';
-          
+
           return RestaurantDetailPage(
             restaurantId: restaurantId,
             restaurantName: restaurantName,
@@ -61,11 +64,6 @@ class AppRouter {
         path: RouteNames.Home,
         name: RouteNames.Home,
         builder: (context, state) => const MenuSnapHomePage(),
-      ),
-      GoRoute(
-        path: RouteNames.payment,
-        name: RouteNames.payment,
-        builder: (context, state) => const PaymentScreen(orderId: '1', orderDetails: const {'description': 'bla bla'}, totalAmount: 32),
       ),
     ],
 
