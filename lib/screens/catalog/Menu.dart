@@ -4,15 +4,18 @@ import 'package:my_flutter_app/screens/catalog/RestaurantAboutPage.dart';
 import 'package:my_flutter_app/screens/catalog/SearchPage.dart';
 import 'package:my_flutter_app/widgets/catalog/FilterScroll.dart';
 import 'package:my_flutter_app/widgets/catalog/MenuItem.dart';
+import 'package:my_flutter_app/widgets/catalog/MenuItemWithButton.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   final String restaurantId;
   final String restaurantName;
+  final bool showCartButtons; // true if coming from scan page, false from catalog
 
   const RestaurantDetailPage({
     super.key,
     required this.restaurantId,
     required this.restaurantName,
+    this.showCartButtons = false, // default to catalog view
   });
 
   @override
@@ -147,7 +150,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       },
       {
         'id': '3',
-        'name': 'Rainbow Roll asdfghj jhgfd cgyuuhv',
+        'name': 'Rainbow Roll',
         'price': '\$10.99',
         'imageUrl':
             'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
@@ -457,20 +460,35 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                         ]
                                       : null,
                                 ),
-                                child: MenuItemCard(
-                                  id: itemId,
-                                  name: item['name'],
-                                  price: item['price'],
-                                  imageUrl: item['imageUrl'],
-                                  quantity: quantity,
-                                  onAdd: _addToCart,
-                                  onRemove: _removeFromCart,
-                                  onTap: () {
-                                    MealDetailModal.show(context,
-                                        mealId: itemId,
-                                        restaurantId: widget.restaurantId);
-                                  },
-                                ),
+                                child: widget.showCartButtons
+                                    ? MenuItemCardBtn(
+                                        id: itemId,
+                                        name: item['name'],
+                                        price: item['price'],
+                                        imageUrl: item['imageUrl'],
+                                        quantity: quantity,
+                                        onAdd: _addToCart,
+                                        onRemove: _removeFromCart,
+                                        onTap: () {
+                                          MealDetailModal.show(context,
+                                              mealId: itemId,
+                                              restaurantId: widget.restaurantId);
+                                        },
+                                      )
+                                    : MenuItemCard(
+                                        id: itemId,
+                                        name: item['name'],
+                                        price: item['price'],
+                                        imageUrl: item['imageUrl'],
+                                        quantity: quantity,
+                                        onAdd: _addToCart,
+                                        onRemove: _removeFromCart,
+                                        onTap: () {
+                                          MealDetailModal.show(context,
+                                              mealId: itemId,
+                                              restaurantId: widget.restaurantId);
+                                        },
+                                      ),
                               );
                             },
                           ),
