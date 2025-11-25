@@ -13,6 +13,12 @@ class RouteNames {
   static const String Home = '/home';
   static const String qrcodeScan = '/qrcode-scan';
 
+  static const String about = '/about';
+  static const String appereance = '/appereance';
+  static const String policy = '/policy';
+  static const String terms = '/terms';
+  static const String edit_profile = '/edit_profile';
+
 // Add more routes as needed
 // Example: static const String dashboard = '/dashboard';
 }

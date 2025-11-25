@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
-import 'package:my_flutter_app/screens/orders/OrderPage.dart';
+import 'package:my_flutter_app/screens/profile/about.dart';
+import 'package:my_flutter_app/screens/profile/edit_profile.dart';
+import 'package:my_flutter_app/screens/profile/policy.dart';
+import 'package:my_flutter_app/screens/profile/profile_screen.dart';
+import 'package:my_flutter_app/screens/profile/terms.dart';
 import 'package:my_flutter_app/widgets/common/BottomBar.dart';
 import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
 
@@ -20,9 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = const [
     Center(child: MenuSnapHomePage()),
     Center(child: CatalogPage()),
-    Center(child: Text("Scan Page")),
-    Center(child: OrdersPage()),
-    Center(child: Text("Profile Page")),
+    Center(child: ProfileScreen()),
+    Center(child: AboutScreen()),
+
   ];
 
   @override

@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:my_flutter_app/screens/catalog/Menu.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
-import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
+import 'package:my_flutter_app/screens/profile/about.dart';
+import 'package:my_flutter_app/screens/profile/edit_profile.dart';
+import 'package:my_flutter_app/screens/profile/policy.dart';
+import 'package:my_flutter_app/screens/profile/terms.dart';
 import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
@@ -48,7 +51,7 @@ class AppRouter {
         builder: (context, state) {
           final restaurantId = state.pathParameters['restaurantId'] ?? '';
           final restaurantName = state.pathParameters['restaurantName'] ?? '';
-          
+
           return RestaurantDetailPage(
             restaurantId: restaurantId,
             restaurantName: restaurantName,
@@ -59,6 +62,26 @@ class AppRouter {
         path: RouteNames.Home,
         name: RouteNames.Home,
         builder: (context, state) => const MenuSnapHomePage(),
+      ),
+      GoRoute(
+        path: RouteNames.about,
+        name: RouteNames.about,
+        builder: (context, state) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.policy,
+        name: RouteNames.policy,
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.terms,
+        name: RouteNames.terms,
+        builder: (context, state) => const TermsConditionsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.edit_profile,
+        name: RouteNames.edit_profile,
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
 
