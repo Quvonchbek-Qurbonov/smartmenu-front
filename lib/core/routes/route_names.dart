@@ -11,6 +11,7 @@ class RouteNames {
   static const String catalog = '/catalog';
   static const String menu = '/menu';
   static const String Home = '/home';
+  static const String qrcodeScan = '/qrcode-scan';
 
 // Add more routes as needed
 // Example: static const String dashboard = '/dashboard';

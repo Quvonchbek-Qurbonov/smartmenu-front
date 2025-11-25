@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
 import 'package:my_flutter_app/widgets/common/BottomBar.dart';
+import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key}); // 👈 Important for using const in router
@@ -17,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = const [
     Center(child: MenuSnapHomePage()),
     Center(child: CatalogPage()),
-    Center(child: Text("Scan Page")),
+    Center(child: QRCodeScanScreen()),
     Center(child: Text("Smart Home Page")),
     Center(child: Text("Profile Page")),
   ];
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
+          
             _selectedIndex = index;
           });
         },
