@@ -39,6 +39,11 @@ class AppRouter {
         name: RouteNames.catalog,
         builder: (context, state) => const CatalogPage(),
       ),
+      // GoRoute(
+      //   path: RouteNames.qrcodeScan,
+      //   name: RouteNames.qrcodeScan,
+      //   builder: (context, state) => QRCodeScanScreen(),
+      // ),
       // Restaurant Detail Route with Path Parameters
       GoRoute(
         path: '${RouteNames.menu}/:restaurantId/:restaurantName',
