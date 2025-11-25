@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:my_flutter_app/screens/catalog/Menu.dart';
 import 'package:my_flutter_app/screens/catalog/catalog_screen.dart';
 import 'package:my_flutter_app/screens/home/HomePage.dart';
+import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
 import '../../screens/all_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/settings/settings_screen.dart';
@@ -35,6 +36,11 @@ class AppRouter {
         name: RouteNames.catalog,
         builder: (context, state) => const CatalogPage(),
       ),
+      // GoRoute(
+      //   path: RouteNames.qrcodeScan,
+      //   name: RouteNames.qrcodeScan,
+      //   builder: (context, state) => QRCodeScanScreen(),
+      // ),
       // Restaurant Detail Route with Path Parameters
       GoRoute(
         path: '${RouteNames.menu}/:restaurantId/:restaurantName',
