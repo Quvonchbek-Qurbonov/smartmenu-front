@@ -65,6 +65,18 @@ class AppRouter {
         name: RouteNames.Home,
         builder: (context, state) => const MenuSnapHomePage(),
       ),
+      GoRoute(
+        path: RouteNames.payment,
+        name: RouteNames.payment,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PaymentScreen(
+            orderId: extra?['orderId'] ?? '',
+            totalAmount: extra?['totalAmount'] ?? 0.0,
+            orderDetails: extra?['orderDetails'] ?? {},
+          );
+        },
+      ),
     ],
 
     // Error page

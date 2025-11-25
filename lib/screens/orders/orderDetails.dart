@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:my_flutter_app/core/routes/route_names.dart';
 import 'package:my_flutter_app/screens/catalog/Menu.dart';
 
 class OrderDetailPage extends StatelessWidget {
@@ -12,6 +14,22 @@ class OrderDetailPage extends StatelessWidget {
     required this.title,
     required this.status,
   }) : super(key: key);
+
+  // Calculate total amount
+  double _calculateTotal() {
+    // In a real app, this would sum up actual cart items
+    return 67.0;
+  }
+
+  // Get order items
+  List<Map<String, dynamic>> _getOrderItems() {
+    return [
+      {'name': 'Sushi Rainbow Roll 1x', 'price': 45.0},
+      {'name': 'Green Salad 1x', 'price': 10.0},
+      {'name': 'Carrot Juice', 'price': 10.0},
+      {'name': 'Water', 'price': 2.0},
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +249,18 @@ class OrderDetailPage extends StatelessWidget {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Payment Logic
+                            context.pushNamed(
+                              RouteNames.payment,
+                              extra: {
+                                'orderId': orderId,
+                                'totalAmount': _calculateTotal(),
+                                'orderDetails': {
+                                  'restaurantName': title,
+                                  'items': _getOrderItems(),
+                                  'table': '#12',
+                                },
+                              },
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF8B5CF6),
@@ -239,25 +268,33 @@ class OrderDetailPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text("Pay Now",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          child: const Text(
+                            "Pay Now",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: () {
-                         Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => RestaurantDetailPage(restaurantId: '1', restaurantName: 'bbb',),
-                                        ),
-                                      );
-                          },
-                        child: const Text("Add something else",
-                            style: TextStyle(color: Color(0xFF8B5CF6))),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RestaurantDetailPage(
+                                restaurantId: '1',
+                                restaurantName: title,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Add something else",
+                          style: TextStyle(color: Color(0xFF8B5CF6)),
+                        ),
                       ),
                     ],
                   ),
