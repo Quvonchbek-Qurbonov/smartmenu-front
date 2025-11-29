@@ -55,6 +55,11 @@ class AppRouter {
         name: RouteNames.terms,
         builder: (context, state) => const TermsConditionsScreen(),
       ),
+       GoRoute(
+        path: RouteNames.edit_profile,
+        name: RouteNames.edit_profile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
 
       // GoRoute(
       //   path: RouteNames.qrcodeScan,
