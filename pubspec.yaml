@@ -35,10 +35,14 @@ flutter:
       - assets/restaurant/
       - assets/restaurant/maxway/
       - assets/restaurant/evos/
+      - assets/restaurant/lesailes/
       - assets/meals/
       - assets/meals/maxway/
       - assets/meals/evos/
+      - assets/meals/lesailes/
       - assets/category/
+      - assets/category/evos/
+      - assets/category/lesailes/
   # fonts:
   #   - family: Schyler
   #     fonts:
