@@ -1,21 +1,32 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:my_flutter_app/screens/catalog/MealDetails.dart';
 import 'package:my_flutter_app/screens/catalog/RestaurantAboutPage.dart';
 import 'package:my_flutter_app/screens/catalog/SearchPage.dart';
 import 'package:my_flutter_app/widgets/catalog/FilterScroll.dart';
 import 'package:my_flutter_app/widgets/catalog/MenuItem.dart';
 import 'package:my_flutter_app/widgets/catalog/MenuItemWithButton.dart';
+import 'package:my_flutter_app/screens/orders/CartPage.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   final String restaurantId;
   final String restaurantName;
-  final bool showCartButtons; // true if coming from scan page, false from catalog
+  final String?  restaurantDescription;
+  final String? restaurantAvatar;
+  final String? restaurantLocation;
+  final bool showCartButtons;
+  final int? tableNumber;
 
   const RestaurantDetailPage({
     super.key,
-    required this.restaurantId,
+    required this. restaurantId,
     required this.restaurantName,
-    this.showCartButtons = false, // default to catalog view
+    this.restaurantDescription,
+    this.restaurantAvatar,
+    this.restaurantLocation,
+    this.showCartButtons = false,
+    this.tableNumber,
   });
 
   @override
@@ -23,21 +34,19 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  static const String baseUrl = 'http://167.172.122.176:8000/api';
+
   bool isLoading = true;
+  String? errorMessage;
   String selectedCategoryId = '';
   List<Map<String, dynamic>> categories = [];
   List<Map<String, dynamic>> menuItems = [];
-  Map<String, int> cart = {}; // itemId: quantity
-  String? highlightedMealId; // Track which meal to highlight
+  Map<String, int> cart = {};
+  String?  highlightedMealId;
 
-  // Restaurant details
-  String restaurantImageUrl = '';
-  List<String> restaurantTags = [];
-  String restaurantDescription = '';
+  List<String> restaurantTags = ['⭐ Popular', '🍽️ Fine Dining', '👨‍🍳 Expert Chefs'];
 
-  // ScrollController for GridView
   final ScrollController _scrollController = ScrollController();
-  // GlobalKeys for each menu item
   final Map<String, GlobalKey> _itemKeys = {};
 
   @override
@@ -52,167 +61,93 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     super.dispose();
   }
 
+  Future<List<Map<String, dynamic>>> _fetchCategories() async {
+    final url = '$baseUrl/category/restaurant/${widget.restaurantId}';
+    debugPrint('Fetching categories from: $url');
+
+    try {
+      final response = await http. get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((item) => {
+          'id': item['id']. toString(),
+          'name': item['name'] ?? 'Unknown',
+          'icon': item['icon'] ?? 'default. png',
+        }).toList();
+      } else {
+        throw Exception('Failed to load categories: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching categories: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchMealsForCategory(String categoryId) async {
+    final url = '$baseUrl/meals/category/$categoryId';
+    debugPrint('Fetching meals from: $url');
+
+    try {
+      final response = await http. get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json. decode(response.body);
+        return data.map((item) => {
+          'id': item['id'].toString(),
+          'name': item['name'] ?? 'Unknown',
+          'price': item['price']?.toDouble() ?? 0.0,
+          'categoryId': item['category_id'].toString(),
+          'imageUrl': item['image_url'] ?? 'default.png',
+          'description': item['description'] ??  '',
+        }).toList();
+      } else {
+        throw Exception('Failed to load meals: ${response. statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching meals: $e');
+      return [];
+    }
+  }
+
   Future<void> _loadRestaurantData() async {
     setState(() {
       isLoading = true;
+      errorMessage = null;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 800));
+    try {
+      categories = await _fetchCategories();
 
-    setState(() {
-      categories = _getCategoriesForRestaurant(widget.restaurantId);
-      menuItems = _getMenuItemsForRestaurant(widget.restaurantId);
+      if (categories.isEmpty) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'No categories found for this restaurant';
+        });
+        return;
+      }
 
-      // Create keys for each menu item
+      selectedCategoryId = categories. first['id'];
+
+      List<Map<String, dynamic>> allMeals = [];
+      for (var category in categories) {
+        final meals = await _fetchMealsForCategory(category['id']);
+        allMeals.addAll(meals);
+      }
+
+      menuItems = allMeals;
+
       for (var item in menuItems) {
         _itemKeys[item['id']] = GlobalKey();
       }
 
-      // Get restaurant details
-      final restaurantData = _getRestaurantDetails(widget.restaurantId);
-      restaurantImageUrl = restaurantData['imageUrl'];
-      restaurantTags = List<String>.from(restaurantData['tags']);
-      restaurantDescription = restaurantData['description'];
-
-      selectedCategoryId = categories.isNotEmpty ? categories.first['id'] : '';
-      isLoading = false;
-    });
-  }
-
-  List<Map<String, dynamic>> _getCategoriesForRestaurant(String restaurantId) {
-    if (restaurantId == '1' || restaurantId == '2') {
-      return [
-        {'id': 'soups', 'name': 'Soups', 'icon': '🍜'},
-        {'id': 'salads', 'name': 'Salads', 'icon': '🥗'},
-        {'id': 'sushi', 'name': 'Sushi', 'icon': '🍣'},
-        {'id': 'japanese', 'name': 'Japanese Specials', 'icon': '🍱'},
-        {'id': 'grilled', 'name': 'Grilled Meats', 'icon': '🥩'},
-        {'id': 'chicken', 'name': 'Chicken Dishes', 'icon': '🍗'},
-        {'id': 'seafood', 'name': 'Seafood', 'icon': '🐟'},
-      ];
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to load restaurant data: $e';
+      });
     }
-
-    return [
-      {'id': 'all', 'name': 'All', 'icon': '🍽️'},
-      {'id': 'popular', 'name': 'Popular', 'icon': '⭐'},
-      {'id': 'mains', 'name': 'Main Dishes', 'icon': '🍛'},
-    ];
-  }
-
-  Map<String, dynamic> _getRestaurantDetails(String restaurantId) {
-    if (restaurantId == '1') {
-      return {
-        'imageUrl':
-            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
-        'tags': ['🔥 Grill Expert', '🥩 Premium Beef', '🥬 Fresh'],
-        'description':
-            'Experience authentic Japanese flavors at ${widget.restaurantName}. We pride ourselves on using only the freshest ingredients and traditional cooking methods to bring you the best dining experience. Our expert chefs craft each dish with passion and attention to detail, ensuring every bite is a culinary delight.',
-      };
-    }
-
-    if (restaurantId == '2') {
-      return {
-        'imageUrl':
-            'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600',
-        'tags': ['🍕 Italian Style', '🌿 Organic', '⚡ Fast Service'],
-        'description':
-            'Welcome to ${widget.restaurantName}, where Italian tradition meets modern cuisine. Our wood-fired pizzas and handmade pasta are crafted with love using authentic recipes passed down through generations. Every ingredient is carefully selected to ensure the highest quality.',
-      };
-    }
-
-    return {
-      'imageUrl':
-          'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600',
-      'tags': ['⭐ Popular', '🍽️ Fine Dining', '👨‍🍳 Expert Chefs'],
-      'description':
-          'At ${widget.restaurantName}, we believe in creating memorable dining experiences. Our menu features a carefully curated selection of dishes made with the finest ingredients. Whether you\'re here for a quick bite or a leisurely meal, we\'re committed to exceeding your expectations.',
-    };
-  }
-
-  List<Map<String, dynamic>> _getMenuItemsForRestaurant(String restaurantId) {
-    return [
-      {
-        'id': '1',
-        'name': 'Spicy Salmon Roll',
-        'price': '\$6.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '2',
-        'name': 'Philadelphia Roll',
-        'price': '\$7.49',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '3',
-        'name': 'Rainbow Roll',
-        'price': '\$10.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '4',
-        'name': 'California Roll',
-        'price': '\$6.49',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '5',
-        'name': 'Dragon Roll',
-        'price': '\$12.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '6',
-        'name': 'Tuna Roll',
-        'price': '\$8.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-        'categoryId': 'sushi',
-      },
-      {
-        'id': '7',
-        'name': 'Miso Soup',
-        'price': '\$4.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400',
-        'categoryId': 'soups',
-      },
-      {
-        'id': '8',
-        'name': 'Caesar Salad',
-        'price': '\$8.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400',
-        'categoryId': 'salads',
-      },
-      {
-        'id': '9',
-        'name': 'Grilled Chicken',
-        'price': '\$14.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400',
-        'categoryId': 'chicken',
-      },
-      {
-        'id': '10',
-        'name': 'Salmon Teriyaki',
-        'price': '\$16.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400',
-        'categoryId': 'seafood',
-      },
-    ];
   }
 
   List<Map<String, dynamic>> get filteredMenuItems {
@@ -244,18 +179,28 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   }
 
   void _scrollToMeal(String mealId) {
-    // Wait for the frame to complete before scrolling
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _itemKeys[mealId];
       if (key != null && key.currentContext != null) {
         Scrollable.ensureVisible(
           key.currentContext!,
           duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-          alignment: 0.2, // Position the item 20% from the top
+          curve: Curves. easeInOut,
+          alignment: 0.2,
         );
       }
     });
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price is double) {
+      return '\$${price.toStringAsFixed(2)}';
+    } else if (price is int) {
+      return '\$${price.toStringAsFixed(2)}';
+    } else if (price is String) {
+      return price. startsWith('\$') ? price : '\$$price';
+    }
+    return '\$0.00';
   }
 
   @override
@@ -271,8 +216,36 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             Icons.arrow_back,
             color: Color(0xFF131316),
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator. pop(context),
         ),
+        title: widget.tableNumber != null
+            ? Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.green. shade100,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.table_bar,
+                size: 16,
+                color: Colors. green.shade700,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Table ${widget.tableNumber}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ],
+          ),
+        )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(
@@ -285,31 +258,30 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 MaterialPageRoute(
                   builder: (context) => SearchPage(
                     searchType: 'meal',
-                    searchData: menuItems.map((item) {
+                    searchData: menuItems. map((item) {
                       return {
                         ...item,
                         'restaurantId': widget.restaurantId,
+                        'price': _formatPrice(item['price']),
+                        'imageUrl': 'assets/meals/${item['imageUrl']}',
                       };
-                    }).toList(),
+                    }). toList(),
                   ),
                 ),
               );
 
-              // If a meal was selected from search
               if (result != null && result is Map<String, dynamic>) {
                 final categoryId = result['categoryId'];
                 final mealId = result['mealId'];
                 final shouldScroll = result['scrollToMeal'] ?? false;
 
-                if (categoryId != null && categoryId.isNotEmpty) {
+                if (categoryId != null && categoryId. isNotEmpty) {
                   setState(() {
                     selectedCategoryId = categoryId;
                     if (shouldScroll && mealId != null) {
                       highlightedMealId = mealId;
-                      // Scroll to the meal after the category is updated
                       _scrollToMeal(mealId);
-                      
-                      // Clear highlight after 2 seconds
+
                       Future.delayed(const Duration(seconds: 2), () {
                         if (mounted) {
                           setState(() {
@@ -329,205 +301,334 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               color: Color(0xFF131316),
             ),
             onPressed: () {
+              String imageUrl = '';
+              if (widget.restaurantAvatar != null && widget.restaurantAvatar!. isNotEmpty) {
+                imageUrl = 'assets/restaurant/${widget.restaurantAvatar}';
+              }
+
               RestaurantAboutModal.show(
                 context,
                 restaurantName: widget.restaurantName,
-                imageUrl: restaurantImageUrl,
+                imageUrl: imageUrl,
                 tags: restaurantTags,
-                description: restaurantDescription,
+                description: widget.restaurantDescription ??
+                    'Welcome to ${widget.restaurantName}.  We serve delicious food with the finest ingredients.',
               );
             },
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF875BF7),
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 8),
-                  child: Text(
-                    widget.restaurantName,
-                    style: const TextStyle(
-                      color: Color(0xFF131316),
-                      fontSize: 20,
-                      fontFamily: 'Outfit',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-
-                // Category badges
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: restaurantTags.map((tag) {
-                      Color bgColor = Colors.grey.shade50;
-                      if (tag.contains('🔥') || tag.contains('Grill')) {
-                        bgColor = Colors.orange.shade50;
-                      } else if (tag.contains('🥩') ||
-                          tag.contains('Beef') ||
-                          tag.contains('Italian')) {
-                        bgColor = Colors.red.shade50;
-                      } else if (tag.contains('🥬') ||
-                          tag.contains('Fresh') ||
-                          tag.contains('Organic')) {
-                        bgColor = Colors.green.shade50;
-                      } else if (tag.contains('⚡') || tag.contains('Fast')) {
-                        bgColor = Colors.blue.shade50;
-                      }
-
-                      return _buildBadge(tag, bgColor);
-                    }).toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Color(0xFFE0E0E0),
-                ),
-
-                // Main content: Filter scroll (left) + Menu items (right)
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left Side - Category Filter (Vertical)
-                      CategoryFilterWidget(
-                        categories: categories,
-                        selectedCategoryId: selectedCategoryId,
-                        onCategorySelected: (categoryId) {
-                          setState(() {
-                            selectedCategoryId = categoryId;
-                            highlightedMealId = null; // Clear highlight when changing category manually
-                          });
-                        },
-                      ),
-
-                      // Right Side - Menu Items Grid
-                      Expanded(
-                        child: Container(
-                          color: Colors.white,
-                          padding: const EdgeInsets.all(16),
-                          child: GridView.builder(
-                            controller: _scrollController,
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 160,   // max card width (try 130–160)
-                              childAspectRatio: 0.5,    // adjust height ratio for your card
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
-                            itemCount: filteredMenuItems.length,
-                            itemBuilder: (context, index) {
-                              final item = filteredMenuItems[index];
-                              final quantity = cart[item['id']] ?? 0;
-                              final isHighlighted = highlightedMealId == item['id'];
-                              final itemId = item['id'];
-                              
-                              // Ensure key exists, create if not
-                              if (!_itemKeys.containsKey(itemId)) {
-                                _itemKeys[itemId] = GlobalKey();
-                              }
-
-                              return Container(
-                                key: _itemKeys[itemId],
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: isHighlighted
-                                      ? Border.all(
-                                          color: const Color(0xFF875BF7),
-                                          width: 3,
-                                        )
-                                      : null,
-                                  boxShadow: isHighlighted
-                                      ? [
-                                          BoxShadow(
-                                            color: const Color(0xFF875BF7)
-                                                .withOpacity(0.3),
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          )
-                                        ]
-                                      : null,
-                                ),
-                                child: widget.showCartButtons
-                                    ? MenuItemCardBtn(
-                                        id: itemId,
-                                        name: item['name'],
-                                        price: item['price'],
-                                        imageUrl: item['imageUrl'],
-                                        quantity: quantity,
-                                        onAdd: _addToCart,
-                                        onRemove: _removeFromCart,
-                                        onTap: () {
-                                          MealDetailModal.show(context,
-                                              mealId: itemId,
-                                              restaurantId: widget.restaurantId);
-                                        },
-                                      )
-                                    : MenuItemCard(
-                                        id: itemId,
-                                        name: item['name'],
-                                        price: item['price'],
-                                        imageUrl: item['imageUrl'],
-                                        quantity: quantity,
-                                        onAdd: _addToCart,
-                                        onRemove: _removeFromCart,
-                                        onTap: () {
-                                          MealDetailModal.show(context,
-                                              mealId: itemId,
-                                              restaurantId: widget.restaurantId);
-                                        },
-                                      ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-      floatingActionButton: totalCartItems > 0
+      body: _buildBody(),
+      floatingActionButton: totalCartItems > 0 && widget.tableNumber != null
           ? Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {
-                  print('Go to cart with $totalCartItems items');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF875BF7),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: ElevatedButton(
+          onPressed: () async {
+            final updatedCart = await Navigator.push<Map<String, int>>(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CartPage(
+                  restaurantId: widget.restaurantId,
+                  restaurantName: widget.restaurantName,
+                  restaurantAvatar: widget.restaurantAvatar,
+                  tableNumber: widget. tableNumber! ,
+                  cart: cart,
+                  menuItems: menuItems,
                 ),
-                child: const Text(
-                  'Go To Order',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: 'Outfit',
+              ),
+            );
+
+            if (updatedCart != null) {
+              setState(() {
+                cart = updatedCart;
+              });
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF875BF7),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 4,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Go To Order',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors. white. withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$totalCartItems',
+                  style: const TextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            )
+            ],
+          ),
+        ),
+      )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF875BF7),
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadRestaurantData,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 0, 8),
+          child: Text(
+            widget.restaurantName,
+            style: const TextStyle(
+              color: Color(0xFF131316),
+              fontSize: 20,
+              fontFamily: 'Outfit',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: restaurantTags.map((tag) {
+              Color bgColor = Colors.grey.shade50;
+              if (tag. contains('🔥') || tag.contains('Grill')) {
+                bgColor = Colors.orange.shade50;
+              } else if (tag.contains('🥩') ||
+                  tag.contains('Beef') ||
+                  tag.contains('Italian')) {
+                bgColor = Colors.red.shade50;
+              } else if (tag.contains('🥬') ||
+                  tag.contains('Fresh') ||
+                  tag.contains('Organic')) {
+                bgColor = Colors.green.shade50;
+              } else if (tag.contains('⚡') || tag.contains('Fast')) {
+                bgColor = Colors.blue.shade50;
+              }
+
+              return _buildBadge(tag, bgColor);
+            }).toList(),
+          ),
+        ),
+
+        if (widget.restaurantLocation != null && widget.restaurantLocation!.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(
+                  widget.restaurantLocation!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors. grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 8),
+
+        const Divider(
+          height: 1,
+          thickness: 1,
+          color: Color(0xFFE0E0E0),
+        ),
+
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CategoryFilterWidget(
+                categories: categories. map((cat) => {
+                  'id': cat['id'],
+                  'name': cat['name'],
+                  'icon': cat['icon'],
+                }).toList(),
+                selectedCategoryId: selectedCategoryId,
+                onCategorySelected: (categoryId) {
+                  setState(() {
+                    selectedCategoryId = categoryId;
+                    highlightedMealId = null;
+                  });
+                },
+              ),
+
+              Expanded(
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                  child: filteredMenuItems.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.restaurant_menu,
+                          size: 64,
+                          color: Colors. grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No items in this category',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : GridView.builder(
+                    controller: _scrollController,
+                    gridDelegate:
+                    const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 160,
+                      childAspectRatio: 0.5,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: filteredMenuItems.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredMenuItems[index];
+                      final quantity = cart[item['id']] ?? 0;
+                      final isHighlighted = highlightedMealId == item['id'];
+                      final itemId = item['id'];
+
+                      if (! _itemKeys.containsKey(itemId)) {
+                        _itemKeys[itemId] = GlobalKey();
+                      }
+
+                      return Container(
+                        key: _itemKeys[itemId],
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: isHighlighted
+                              ?  Border.all(
+                            color: const Color(0xFF875BF7),
+                            width: 3,
+                          )
+                              : null,
+                          boxShadow: isHighlighted
+                              ? [
+                            BoxShadow(
+                              color: const Color(0xFF875BF7)
+                                  .withOpacity(0.3),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            )
+                          ]
+                              : null,
+                        ),
+                        child: widget.showCartButtons
+                            ? MenuItemCardBtn(
+                          id: itemId,
+                          name: item['name'],
+                          price: _formatPrice(item['price']),
+                          imageUrl: 'assets/meals/${item['imageUrl']}',
+                          quantity: quantity,
+                          onAdd: _addToCart,
+                          onRemove: _removeFromCart,
+                          onTap: () {
+                            MealDetailModal.show(
+                              context,
+                              mealId: itemId,
+                              restaurantId: widget.restaurantId,
+                              name: item['name'],
+                              description: item['description'],
+                              price: _formatPrice(item['price']),
+                              imageUrl: 'assets/meals/${item['imageUrl']}',
+                            );
+                          },
+                        )
+                            : MenuItemCard(
+                          id: itemId,
+                          name: item['name'],
+                          price: _formatPrice(item['price']),
+                          imageUrl: 'assets/meals/${item['imageUrl']}',
+                          quantity: quantity,
+                          onAdd: _addToCart,
+                          onRemove: _removeFromCart,
+                          onTap: () {
+                            MealDetailModal.show(
+                              context,
+                              mealId: itemId,
+                              restaurantId: widget.restaurantId,
+                              name: item['name'],
+                              description: item['description'],
+                              price: _formatPrice(item['price']),
+                              imageUrl: 'assets/meals/${item['imageUrl']}',
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -541,9 +642,9 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       child: Text(
         text,
         style: TextStyle(
-          color: backgroundColor.computeLuminance() > 0.5
-              ? Colors.black87
-              : Colors.white,
+          color: backgroundColor. computeLuminance() > 0.5
+          ? Colors.black87
+          : Colors.white,
           fontSize: 12,
           fontFamily: 'Outfit',
           fontWeight: FontWeight.w500,

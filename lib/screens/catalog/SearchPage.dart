@@ -8,8 +8,8 @@ class SearchPage extends StatefulWidget {
 
   const SearchPage({
     super.key,
-    required this.searchType,
-    required this.searchData,
+    required this. searchType,
+    required this. searchData,
   });
 
   @override
@@ -23,7 +23,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchController. dispose();
     super.dispose();
   }
 
@@ -39,11 +39,69 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _hasSearched = true;
       _searchResults = widget.searchData.where((item) {
-        final name = item['name'].toString().toLowerCase();
+        final name = item['name']. toString().toLowerCase();
         final searchQuery = query.toLowerCase();
         return name.contains(searchQuery);
       }).toList();
     });
+  }
+
+  // Helper method to check if URL is network or asset
+  bool _isNetworkUrl(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
+  }
+
+  // Helper method to build image widget
+  Widget _buildImage(String?  imageUrl, {double? width, double? height}) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Container(
+        width: width,
+        height: height,
+        color: const Color(0xFFF9F9F9),
+        child: const Icon(
+          Icons. restaurant,
+          color: Colors. grey,
+        ),
+      );
+    }
+
+    if (_isNetworkUrl(imageUrl)) {
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: width,
+            height: height,
+            color: const Color(0xFFF9F9F9),
+            child: const Icon(
+              Icons.restaurant,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: width,
+            height: height,
+            color: const Color(0xFFF9F9F9),
+            child: const Icon(
+              Icons.restaurant,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -75,7 +133,7 @@ class _SearchPageState extends State<SearchPage> {
             onChanged: _performSearch,
             decoration: InputDecoration(
               hintText:
-                  isMealSearch ? 'Search for meal' : 'Search for restaurants',
+              isMealSearch ?  'Search for meal' : 'Search for restaurants',
               hintStyle: const TextStyle(
                 color: Color(0xFF9E9EA7),
                 fontSize: 14,
@@ -86,7 +144,7 @@ class _SearchPageState extends State<SearchPage> {
                 color: Color(0xFF9E9EA7),
                 size: 20,
               ),
-              border: InputBorder.none,
+              border: InputBorder. none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 10,
@@ -104,7 +162,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildBody(bool isMealSearch) {
-    if (!_hasSearched) {
+    if (! _hasSearched) {
       return _buildEmptyState(isMealSearch);
     }
 
@@ -118,7 +176,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget _buildEmptyState(bool isMealSearch) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment. center,
         children: [
           Container(
             width: 120,
@@ -230,13 +288,13 @@ class _SearchPageState extends State<SearchPage> {
     return InkWell(
       onTap: () {
         final categoryId = meal['categoryId'] ?? '';
-        final mealId = meal['id'] ?? '';
-        
+        final mealId = meal['id'] ??  '';
+
         // Pop and return data to scroll to the specific meal
         Navigator.pop(context, {
           'categoryId': categoryId,
           'mealId': mealId,
-          'scrollToMeal': true, // Flag to indicate we should scroll to this meal
+          'scrollToMeal': true,
         });
       },
       child: Container(
@@ -254,22 +312,10 @@ class _SearchPageState extends State<SearchPage> {
             // Meal Image
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                meal['imageUrl'] ?? '',
+              child: _buildImage(
+                meal['imageUrl'],
                 width: 80,
                 height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 80,
-                    height: 80,
-                    color: const Color(0xFFF9F9F9),
-                    child: const Icon(
-                      Icons.restaurant,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
               ),
             ),
             const SizedBox(width: 12),
@@ -317,13 +363,27 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildRestaurantCard(Map<String, dynamic> restaurant) {
+    // Get image URL - could be 'imageUrl' or built from 'avatar'
+    String? imageUrl = restaurant['imageUrl'];
+    if (imageUrl == null || imageUrl.isEmpty) {
+      final avatar = restaurant['avatar'];
+      if (avatar != null && avatar.toString().isNotEmpty) {
+        imageUrl = 'assets/restaurant/$avatar';
+      }
+    }
+
     return InkWell(
       onTap: () {
         // Navigate to restaurant detail
         context.pushNamed(RouteNames.menu, pathParameters: {
           'restaurantId': restaurant['id'],
           'restaurantName': restaurant['name'],
-        });
+        },
+            extra: {
+              'description': restaurant['description'],
+              'avatar': restaurant['avatar'],
+              'location': restaurant['location'],
+            });
       },
       child: Container(
         width: double.infinity,
@@ -342,28 +402,12 @@ class _SearchPageState extends State<SearchPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Restaurant Image
-            Container(
-              width: 64,
-              height: 64,
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.80),
-                ),
-              ),
-              child: Image.network(
-                restaurant['imageUrl'] ?? '',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFFF9F9F9),
-                    child: const Icon(
-                      Icons.restaurant,
-                      color: Colors.grey,
-                      size: 24,
-                    ),
-                  );
-                },
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.80),
+              child: _buildImage(
+                imageUrl,
+                width: 64,
+                height: 64,
               ),
             ),
 

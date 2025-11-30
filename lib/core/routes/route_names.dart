@@ -1,25 +1,26 @@
 class RouteNames {
-  // Private constructor to prevent instantiation
-  RouteNames._();
+  // Auth routes
+  static const String splash = '/';
+  static const String auth = '/auth';
+  static const String signIn = '/sign-in';
+  static const String signUp = '/sign-up';
+  static const String personalInfo = '/personal-info';
+  static const String selectGender = '/select-gender';
+  static const String forgotPassword = '/forgot-password';
+  static const String otp = '/otp';
+  static const String createNewPassword = '/create-new-password';
 
-  // Route paths
-  static const String home = '/';
+  // Main app routes
+  static const String home = '/home';
+  static const String Home = '/Home';
   static const String profile = '/profile';
   static const String settings = '/settings';
-  static const String details = '/details';
-  static const String login = '/login';
   static const String catalog = '/catalog';
-  static const String menu = '/menu';
-  static const String Home = '/home';
-  static const String qrcodeScan = '/qrcode-scan';
-  static const String payment = '/payment';
-
   static const String about = '/about';
-  static const String appereance = '/appereance';
   static const String policy = '/policy';
   static const String terms = '/terms';
-  static const String edit_profile = '/edit_profile';
-
-// Add more routes as needed
-// Example: static const String dashboard = '/dashboard';
+  static const String edit_profile = '/edit-profile';
+  static const String menu = '/menu';
+  static const String payment = '/payment';
+  static const String orders = '/orders';
 }

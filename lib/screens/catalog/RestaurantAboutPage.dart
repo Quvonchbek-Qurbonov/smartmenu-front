@@ -16,16 +16,16 @@ class RestaurantAboutModal extends StatelessWidget {
   });
 
   static Future<void> show(
-    BuildContext context, {
-    required String restaurantName,
-    required String imageUrl,
-    required List<String> tags,
-    required String description,
-  }) {
+      BuildContext context, {
+        required String restaurantName,
+        required String imageUrl,
+        required List<String> tags,
+        required String description,
+      }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors. transparent,
       builder: (context) => RestaurantAboutModal(
         restaurantName: restaurantName,
         imageUrl: imageUrl,
@@ -35,15 +35,65 @@ class RestaurantAboutModal extends StatelessWidget {
     );
   }
 
+  // Helper method to check if URL is network or asset
+  bool _isNetworkUrl(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
+  }
+
+  // Helper method to build image widget
+  Widget _buildImage() {
+    if (imageUrl.isEmpty) {
+      return _buildPlaceholder();
+    }
+
+    if (_isNetworkUrl(imageUrl)) {
+      return Image.network(
+        imageUrl,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder();
+        },
+      );
+    } else {
+      return Image.asset(
+        imageUrl,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder();
+        },
+      );
+    }
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F9F9),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Icon(
+        Icons.restaurant,
+        size: 60,
+        color: Colors.grey,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.85,
+        height: MediaQuery.of(context).size. height * 0.85,
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
+          borderRadius: BorderRadius. only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -60,9 +110,9 @@ class RestaurantAboutModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Title
             const Text(
               'About',
@@ -73,9 +123,9 @@ class RestaurantAboutModal extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Scrollable Content
             Expanded(
               child: SingleChildScrollView(
@@ -86,36 +136,16 @@ class RestaurantAboutModal extends StatelessWidget {
                     // Restaurant Image
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        imageUrl,
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: double.infinity,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF9F9F9),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.restaurant,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
-                      ),
+                      child: _buildImage(),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Tags
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: tags.map((tag) {
+                      children: tags. map((tag) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -135,16 +165,16 @@ class RestaurantAboutModal extends StatelessWidget {
                             ),
                           ),
                         );
-                      }).toList(),
+                      }). toList(),
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // About Title
                     Row(
                       children: [
                         const Icon(
-                          Icons.edit,
+                          Icons. edit,
                           size: 20,
                           color: Color(0xFF131316),
                         ),
@@ -160,9 +190,9 @@ class RestaurantAboutModal extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Description
                     Text(
                       description,
@@ -174,13 +204,13 @@ class RestaurantAboutModal extends StatelessWidget {
                         height: 1.6,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 40),
                   ],
                 ),
               ),
             ),
-            
+
             // Close Button
             Container(
               padding: const EdgeInsets.all(20),

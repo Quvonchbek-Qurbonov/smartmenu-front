@@ -7,35 +7,71 @@ class OrderDetailPage extends StatelessWidget {
   final String orderId;
   final String title;
   final String status;
+  final int?  tableNumber;
+  final List<Map<String, dynamic>>? items;
+  final double?  total;
+  final String? restaurantAvatar;
+  final String? restaurantId;
 
   const OrderDetailPage({
     Key? key,
-    required this.orderId,
-    required this.title,
+    required this. orderId,
+    required this. title,
     required this.status,
+    this.tableNumber,
+    this.items,
+    this.total,
+    this. restaurantAvatar,
+    this.restaurantId,
   }) : super(key: key);
 
-  // Calculate total amount
   double _calculateTotal() {
-    // In a real app, this would sum up actual cart items
+    if (total != null) return total! ;
+    if (items != null) {
+      double sum = 0;
+      for (var item in items!) {
+        double price = 0;
+        if (item['price'] is double) {
+          price = item['price'];
+        } else if (item['price'] is int) {
+          price = item['price'].toDouble();
+        } else if (item['price'] is String) {
+          price = double.tryParse(item['price']. replaceAll('\$', '')) ?? 0;
+        }
+        sum += price * (item['quantity'] ?? 1);
+      }
+      return sum;
+    }
     return 67.0;
   }
 
-  // Get order items
   List<Map<String, dynamic>> _getOrderItems() {
+    if (items != null) return items! ;
     return [
-      {'name': 'Sushi Rainbow Roll 1x', 'price': 45.0},
-      {'name': 'Green Salad 1x', 'price': 10.0},
-      {'name': 'Carrot Juice', 'price': 10.0},
-      {'name': 'Water', 'price': 2.0},
+    {'name': 'Sushi Rainbow Roll', 'price': 45.0, 'quantity': 1},
+    {'name': 'Green Salad', 'price': 10.0, 'quantity': 1},
+    {'name': 'Carrot Juice', 'price': 10.0, 'quantity': 1},
+    {'name': 'Water', 'price': 2.0, 'quantity': 1},
     ];
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price is double) {
+      return '\$${price.toStringAsFixed(2)}';
+    } else if (price is int) {
+      return '\$${price.toStringAsFixed(2)}';
+    } else if (price is String) {
+      return price. startsWith('\$') ? price : '\$$price';
+    }
+    return '\$0.00';
   }
 
   @override
   Widget build(BuildContext context) {
-    // Logic for AppBar Title: 'Paid'/'Cancelled' -> Order ID, 'Current' -> "Order detail"
     final String appBarTitle =
-        (status == 'Paid' || status == 'Cancelled') ? orderId : "Order detail";
+    (status == 'Paid' || status == 'Cancelled') ? orderId : "Order detail";
+    final orderItems = _getOrderItems();
+    final orderTotal = _calculateTotal();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -44,12 +80,17 @@ class OrderDetailPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (status == 'Current') {
+              context.go(RouteNames.home);
+            } else {
+              Navigator.pop(context);
+            }
+          },
         ),
         title: Text(
           appBarTitle,
-          style:
-              const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -61,7 +102,7 @@ class OrderDetailPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    // Restaurant Card - Separated Container
+                    // Restaurant Card
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -76,12 +117,9 @@ class OrderDetailPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
-                              image: const DecorationImage(
-                                image: NetworkImage(
-                                    'https://via.placeholder.com/150'),
-                                fit: BoxFit.cover,
-                              ),
                             ),
+                            clipBehavior: Clip.antiAlias,
+                            child: _buildRestaurantImage(),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -111,7 +149,7 @@ class OrderDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Order Details Container - Separated
+                    // Order Details Container
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -121,60 +159,72 @@ class OrderDetailPage extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildDetailRow("Order", orderId),
-                          _buildDetailRow("Table", "#12"),
+                          _buildDetailRow("Table", "#${tableNumber ??  12}"),
                           const SizedBox(height: 16),
                           const Divider(height: 1),
                           const SizedBox(height: 16),
-                          _buildDetailRow("Sushi Rainbow Roll 1x", "\$45"),
-                          _buildDetailRow("Green Salad 1x", "\$10"),
-                          _buildDetailRow("Carrot Juice", "\$10"),
-                          _buildDetailRow("Water", "\$2"),
+
+                          // Order items
+                          ... orderItems.map((item) {
+                            final quantity = item['quantity'] ?? 1;
+                            final name = item['name'];
+                            final price = item['price'];
+                            return _buildDetailRow(
+                              '$name ${quantity}x',
+                              _formatPrice(price),
+                            );
+                          }).toList(),
+
                           const SizedBox(height: 16),
                           const Divider(height: 1),
                           const SizedBox(height: 16),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Total",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16)),
-                              Text("\$67",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16)),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
+
+                          // Total
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("Status",
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 14)),
+                              const Text(
+                                "Total",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                _formatPrice(orderTotal),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Status
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                "Status",
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: status == 'Current'
-                                      ? const Color(0xFFF3F0FF)
-                                      : (status == 'Paid'
-                                          ? Colors.green.withOpacity(0.1)
-                                          : Colors.red.withOpacity(0.1)),
+                                  color: _getStatusColor(),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  status == 'Current'
-                                      ? "Waiting Payment"
-                                      : status,
+                                  _getStatusText(),
                                   style: TextStyle(
-                                      color: status == 'Current'
-                                          ? const Color(0xFF8B5CF6)
-                                          : (status == 'Paid'
-                                              ? Colors.green
-                                              : Colors.red),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
+                                    color: _getStatusTextColor(),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               )
                             ],
@@ -183,7 +233,7 @@ class OrderDetailPage extends StatelessWidget {
                       ),
                     ),
 
-                    // Payment Info Container - Only for Paid status
+                    // Payment Info - Only for Paid status
                     if (status == 'Paid') ...[
                       const SizedBox(height: 16),
                       Container(
@@ -200,22 +250,29 @@ class OrderDetailPage extends StatelessWidget {
                                 color: const Color(0xFFEDE7FF),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.credit_card,
-                                  color: Color(0xFF8B5CF6), size: 24),
+                              child: const Icon(
+                                Icons.credit_card,
+                                color: Color(0xFF8B5CF6),
+                                size: 24,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("Recharged With Card",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14)),
+                                Text(
+                                  "Recharged With Card",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
                                 SizedBox(height: 2),
-                                Text("4624 **** **** **55",
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.grey)),
+                                Text(
+                                  "4624 **** **** **55",
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
                               ],
                             ),
                           ],
@@ -227,7 +284,7 @@ class OrderDetailPage extends StatelessWidget {
               ),
             ),
 
-            // DYNAMIC BOTTOM SECTION - Only for Current status
+            // Bottom Section - Only for Current status
             if (status == 'Current')
               Container(
                 padding: const EdgeInsets.all(20),
@@ -235,9 +292,10 @@ class OrderDetailPage extends StatelessWidget {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        offset: const Offset(0, -4),
-                        blurRadius: 10),
+                      color: Colors.black.withOpacity(0.05),
+                      offset: const Offset(0, -4),
+                      blurRadius: 10,
+                    ),
                   ],
                 ),
                 child: SafeArea(
@@ -253,11 +311,11 @@ class OrderDetailPage extends StatelessWidget {
                               RouteNames.payment,
                               extra: {
                                 'orderId': orderId,
-                                'totalAmount': _calculateTotal(),
+                                'totalAmount': orderTotal,
                                 'orderDetails': {
                                   'restaurantName': title,
-                                  'items': _getOrderItems(),
-                                  'table': '#12',
+                                  'items': orderItems,
+                                  'table': '#${tableNumber ?? 12}',
                                 },
                               },
                             );
@@ -285,8 +343,11 @@ class OrderDetailPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => RestaurantDetailPage(
-                                restaurantId: '1',
+                                restaurantId: restaurantId ??  '1',
                                 restaurantName: title,
+                                restaurantAvatar: restaurantAvatar,
+                                showCartButtons: true,
+                                tableNumber: tableNumber,
                               ),
                             ),
                           );
@@ -304,6 +365,59 @@ class OrderDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildRestaurantImage() {
+    if (restaurantAvatar != null && restaurantAvatar!.isNotEmpty) {
+      return Image.asset(
+        'assets/restaurant/$restaurantAvatar',
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.restaurant,
+          color: Colors.grey,
+        ),
+      );
+    }
+    return const Icon(Icons. restaurant, color: Colors.grey);
+  }
+
+  Color _getStatusColor() {
+    switch (status) {
+      case 'Current':
+        return const Color(0xFFF3F0FF);
+      case 'Paid':
+        return Colors.green. withOpacity(0.1);
+      case 'Cancelled':
+        return Colors.red. withOpacity(0.1);
+      default:
+        return const Color(0xFFF3F0FF);
+    }
+  }
+
+  Color _getStatusTextColor() {
+    switch (status) {
+      case 'Current':
+        return const Color(0xFF8B5CF6);
+      case 'Paid':
+        return Colors. green;
+      case 'Cancelled':
+        return Colors.red;
+      default:
+        return const Color(0xFF8B5CF6);
+    }
+  }
+
+  String _getStatusText() {
+    switch (status) {
+      case 'Current':
+        return "Waiting Payment";
+      case 'Paid':
+        return "Paid";
+      case 'Cancelled':
+        return "Cancelled";
+      default:
+        return status;
+    }
   }
 
   Widget _buildTag(String text, MaterialColor color) {
@@ -336,11 +450,16 @@ class OrderDetailPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.grey, fontSize: 14)),
-          Text(value,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+          ),
         ],
       ),
     );

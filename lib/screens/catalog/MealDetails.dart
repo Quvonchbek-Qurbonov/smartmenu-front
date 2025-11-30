@@ -1,122 +1,27 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class MealDetailModal {
-  // Fetch meal details based on mealId
-  static Map<String, dynamic> _getMealDetails(String mealId) {
-    // TODO: Replace with actual API call
-    // This is mock data - in production, fetch from your backend
-    final Map<String, Map<String, dynamic>> mealsDatabase = {
-      '1': {
-        'name': 'Spicy Salmon Roll',
-        'description':
-            'Fresh salmon mixed with spicy mayo, rolled with cucumber and rice, topped with crispy tempura flakes',
-        'price': '\$6.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '2': {
-        'name': 'Philadelphia Roll',
-        'description':
-            'Creamy cream cheese and fresh salmon wrapped in seaweed and rice, garnished with sesame seeds',
-        'price': '\$7.49',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '3': {
-        'name': 'Rainbow Roll',
-        'description':
-            'California roll topped with assorted fresh fish including tuna, salmon, and yellowtail',
-        'price': '\$10.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '4': {
-        'name': 'California Roll',
-        'description':
-            'Classic roll with imitation crab, avocado, and cucumber, wrapped in seaweed and rice',
-        'price': '\$6.49',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '5': {
-        'name': 'Dragon Roll',
-        'description':
-            'Shrimp tempura and cucumber topped with avocado and eel sauce drizzle',
-        'price': '\$12.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '6': {
-        'name': 'Tuna Roll',
-        'description':
-            'Premium bluefin tuna with rice and seaweed, served with wasabi and pickled ginger',
-        'price': '\$8.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
-      },
-      '7': {
-        'name': 'Miso Soup',
-        'description':
-            'Traditional Japanese soup with miso paste, tofu, seaweed, and green onions',
-        'price': '\$4.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400',
-      },
-      '8': {
-        'name': 'Caesar Salad',
-        'description':
-            'Crisp romaine lettuce with parmesan cheese, croutons, and creamy Caesar dressing',
-        'price': '\$8.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400',
-      },
-      '9': {
-        'name': 'Grilled Chicken',
-        'description':
-            'Tender chicken breast marinated in herbs and spices, grilled to perfection',
-        'price': '\$14.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400',
-      },
-      '10': {
-        'name': 'Salmon Teriyaki',
-        'description':
-            'Grilled salmon fillet glazed with homemade teriyaki sauce, served with steamed vegetables',
-        'price': '\$16.99',
-        'imageUrl':
-            'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400',
-      },
-    };
-
-    return mealsDatabase[mealId] ??
-        {
-          'name': 'Unknown Meal',
-          'description': 'No description available',
-          'price': '\$0.00',
-          'imageUrl': 'https://placehold.co/358x201',
-        };
-  }
-
   static Future<void> show(
-    BuildContext context, {
-    required String mealId,
-    required String restaurantId,
-  }) {
-    final mealData = _getMealDetails(mealId);
-
+      BuildContext context, {
+        required String mealId,
+        required String restaurantId,
+        String? name,
+        String? description,
+        String? price,
+        String? imageUrl,
+      }) {
     return showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true, // needed for full height + blur
+      isScrollControlled: true,
       builder: (context) {
         return Stack(
           children: [
             // 🌫 Background blur (frosted)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.pop(context), // 👈 CLOSE ON BLUR TAP
+              onTap: () => Navigator. pop(context),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: Container(
@@ -129,7 +34,7 @@ class MealDetailModal {
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.65, // 88% height
+                height: MediaQuery.of(context).size. height * 0.65,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -139,16 +44,16 @@ class MealDetailModal {
                 ),
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 16),
+                    padding: const EdgeInsets. only(top: 16),
                     child: Column(
                       children: [
-                        // Drag handle (optional)
+                        // Drag handle
                         Container(
                           width: 48,
                           height: 4,
                           decoration: BoxDecoration(
                             color: const Color(0xFFE4E4E7),
-                            borderRadius: BorderRadius.circular(1000),
+                            borderRadius: BorderRadius. circular(1000),
                           ),
                         ),
 
@@ -160,7 +65,7 @@ class MealDetailModal {
                             color: Color(0xFF131316),
                             fontSize: 20,
                             fontFamily: 'Outfit',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight. w700,
                           ),
                         ),
 
@@ -175,8 +80,7 @@ class MealDetailModal {
                             borderRadius: BorderRadius.circular(16),
                             color: const Color(0xFFF9F9F9),
                           ),
-                          child: Image.network(mealData['imageUrl'],
-                              fit: BoxFit.cover),
+                          child: _buildImage(imageUrl),
                         ),
 
                         const SizedBox(height: 16),
@@ -186,17 +90,17 @@ class MealDetailModal {
                           child: Column(
                             children: [
                               Text(
-                                mealData['name'],
+                                name ?? 'Unknown Meal',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 20,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight. w500,
                                   color: Color(0xFF131316),
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                mealData['description'],
+                                description ?? 'No description available',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 16,
@@ -205,7 +109,7 @@ class MealDetailModal {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                mealData['price'],
+                                price ?? '\$0.00',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 24,
@@ -256,5 +160,49 @@ class MealDetailModal {
         );
       },
     );
+  }
+
+  static Widget _buildImage(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return const Center(
+        child: Icon(
+          Icons.restaurant,
+          size: 64,
+          color: Colors.grey,
+        ),
+      );
+    }
+
+    // Check if it's a network URL or asset path
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit. cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(
+            child: Icon(
+              Icons.restaurant,
+              size: 64,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    } else {
+      // It's an asset image
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(
+            child: Icon(
+              Icons.restaurant,
+              size: 64,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    }
   }
 }

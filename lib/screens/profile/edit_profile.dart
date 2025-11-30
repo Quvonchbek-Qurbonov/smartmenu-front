@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../widgets/profile/confirmation_widget.dart';
+import 'package:my_flutter_app/services/auth_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -10,14 +10,13 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // Controllers for text fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
 
-  // Selected gender (0 = male, 1 = female)
-  int _selectedGender = 0;
-
+  String _email = '';
+  int _selectedGender = 0; // 0 = male, 1 = female
   bool _isLoading = false;
+  bool _isLoadingData = true;
 
   @override
   void initState() {
@@ -32,30 +31,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  // Load user data from database/storage
   Future<void> _loadUserData() async {
-    setState(() => _isLoading = true);
+    setState(() => _isLoadingData = true);
 
     try {
-      // TODO: Replace with your actual database call
-      // Example: final userData = await DatabaseService.getUserProfile();
-
-      // For now, using dummy data
-      await Future.delayed(const Duration(milliseconds: 500));
+      final userData = await AuthService. getUserData();
 
       setState(() {
-        _nameController.text = 'John Anderson';
-        _ageController.text = '23';
-        _selectedGender = 0; // 0 = male, 1 = female
+        _nameController.text = userData['full_name'] ?? '';
+        _ageController.text = userData['age'] ?? '';
+        _email = userData['email'] ?? '';
+        _selectedGender = userData['gender'] == 'female' ? 1 : 0;
+        _isLoadingData = false;
       });
     } catch (e) {
+      debugPrint('Error loading user data: $e');
       _showError('Failed to load profile data');
-    } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isLoadingData = false);
     }
   }
 
-  // Show confirmation dialog before saving
   Future<void> _saveChanges() async {
     // Validate inputs
     if (_nameController.text.trim().isEmpty) {
@@ -74,39 +69,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    // Show confirmation dialog (using reusable widget)
-    final confirmed = await ConfirmationDialog.show(
-      context: context,
-      title: 'Save changes?',
-      message: 'Your profile information will be changed',
-      confirmText: 'Save',
-      cancelText: 'Cancel',
-      icon: Icons.check,
-      iconColor: const Color(0xFF4CAF50),
-    );
-
+    // Show confirmation dialog
+    final confirmed = await _showSaveConfirmation();
     if (confirmed != true) return;
 
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Replace with your actual database save call
-      // Example:
-      // await DatabaseService.updateUserProfile(
-      //   name: _nameController.text.trim(),
-      //   age: age,
-      //   gender: _selectedGender == 0 ? 'male' : 'female',
-      // );
+      // Call API to update profile
+      final response = await AuthService.authenticatedPut(
+        '/users/update',
+        body: {
+          'full_name': _nameController.text.trim(),
+          'age': age,
+        },
+      );
 
-      await Future.delayed(const Duration(seconds: 1)); // Simulating API call
+      debugPrint('Update profile status: ${response.statusCode}');
+      debugPrint('Update profile body: ${response.body}');
 
-      if (mounted) {
-        _showSuccess('Profile updated successfully!');
-        // Go back to profile screen after 1 second
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) context.pop();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Update local storage
+        await AuthService.saveUserData(
+          id: (await AuthService.getUserId()) ?? '',
+          email: _email,
+          fullName: _nameController.text. trim(),
+          gender: _selectedGender == 0 ? 'male' : 'female',
+          age: age,
+          isVerified: true,
+        );
+
+        if (mounted) {
+          _showSuccess('Profile updated successfully! ');
+          await Future.delayed(const Duration(seconds: 1));
+          if (mounted) context.pop();
+        }
+      } else {
+        _showError('Failed to update profile');
       }
     } catch (e) {
+      debugPrint('Update profile error: $e');
       _showError('Failed to save changes: $e');
     } finally {
       if (mounted) {
@@ -115,8 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  // Show confirmation dialog
-  Future<bool?> _showSaveConfirmation() {
+  Future<bool? > _showSaveConfirmation() {
     return showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
@@ -128,7 +129,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Check icon
               Container(
                 width: 60,
                 height: 60,
@@ -143,9 +143,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Title
               const Text(
-                'Save changes?',
+                'Save changes? ',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -153,9 +152,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              // Description
               Text(
-                'Your profile information will be changed',
+                'Your profile information will be updated',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -163,13 +161,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              // Buttons
               Row(
                 children: [
-                  // Cancel button
                   Expanded(
                     child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: () => Navigator.of(context). pop(false),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -187,7 +183,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Save button
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(true),
@@ -219,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context). showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
@@ -239,16 +234,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors. white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          onPressed: () => context. pop(),
         ),
         title: const Text(
-          'Profile',
+          'Edit Profile',
           style: TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -257,83 +252,124 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         centerTitle: true,
       ),
-      body: _isLoading
+      body: _isLoadingData
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+
+            // Avatar/Gender Selection
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAvatarOption(
+                  index: 0,
+                  icon: Icons.male,
+                  label: 'Male',
+                  color: const Color(0xFF7C4DFF),
+                ),
+                const SizedBox(width: 40),
+                _buildAvatarOption(
+                  index: 1,
+                  icon: Icons.female,
+                  label: 'Female',
+                  color: const Color(0xFFE91E63),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // Email (read-only)
+            const Text(
+              'Email',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight. w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEEEEEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
                 children: [
-                  const SizedBox(height: 20),
-
-                  // Avatar Selection
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildAvatarOption(
-                        index: 0,
-                        icon: Icons.person,
-                        label: 'Male',
-                        color: const Color(0xFF7C4DFF),
+                  Expanded(
+                    child: Text(
+                      _email,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
                       ),
-                      const SizedBox(width: 40),
-                      _buildAvatarOption(
-                        index: 1,
-                        icon: Icons.person,
-                        label: 'Female',
-                        color: const Color(0xFFE91E63),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Full Name Field
-                  const Text(
-                    'Full name',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _nameController,
-                    hintText: 'Enter your name',
+                  Icon(
+                    Icons.lock_outline,
+                    color: Colors.grey[400],
+                    size: 20,
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Age Field
-                  const Text(
-                    'Age',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _ageController,
-                    hintText: 'Enter your age',
-                    keyboardType: TextInputType.number,
-                  ),
-
-                  const SizedBox(height: 60),
                 ],
               ),
             ),
+
+            const SizedBox(height: 24),
+
+            // Full Name Field
+            const Text(
+              'Full name',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              controller: _nameController,
+              hintText: 'Enter your name',
+            ),
+
+            const SizedBox(height: 24),
+
+            // Age Field
+            const Text(
+              'Age',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              controller: _ageController,
+              hintText: 'Enter your age',
+              keyboardType: TextInputType. number,
+            ),
+
+            const SizedBox(height: 60),
+          ],
+        ),
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SafeArea(
           child: ElevatedButton(
-            onPressed: _isLoading ? null : _saveChanges,
+            onPressed: (_isLoading || _isLoadingData) ? null : _saveChanges,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7C4DFF),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets. symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -341,20 +377,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             child: _isLoading
                 ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
                 : const Text(
-                    'Save changes',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              'Save changes',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
       ),
@@ -395,8 +431,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: isSelected ? color : Colors.grey[600],
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected ? color : Colors. grey[600],
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight. normal,
             ),
           ),
         ],
@@ -407,7 +443,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType keyboardType = TextInputType. text,
   }) {
     return Container(
       decoration: BoxDecoration(

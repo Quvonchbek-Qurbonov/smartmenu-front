@@ -8,7 +8,7 @@ class MenuItemCard extends StatelessWidget {
   final int quantity;
   final Function(String) onAdd;
   final Function(String)? onRemove;
-  final VoidCallback? onTap;
+  final VoidCallback?  onTap;
 
   const MenuItemCard({
     super.key,
@@ -30,7 +30,7 @@ class MenuItemCard extends StatelessWidget {
         width: 130,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius. circular(16),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -47,12 +47,7 @@ class MenuItemCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   color: const Color(0xFFF9F9F9),
                 ),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.restaurant, size: 40, color: Colors.grey),
-                ),
+                child: _buildImage(),
               ),
 
               const SizedBox(height: 8),
@@ -89,5 +84,29 @@ class MenuItemCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImage() {
+    // Check if it's a network URL or asset path
+    if (_isNetworkUrl(imageUrl)) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+        const Icon(Icons.restaurant, size: 40, color: Colors. grey),
+      );
+    } else {
+      // It's an asset image
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit. cover,
+        errorBuilder: (_, __, ___) =>
+        const Icon(Icons.restaurant, size: 40, color: Colors.grey),
+      );
+    }
+  }
+
+  bool _isNetworkUrl(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
   }
 }

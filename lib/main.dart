@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Add this temporarily somewhere to test
     return MaterialApp.router(
       title: 'Smart Menu',
       theme: AppTheme.lightTheme,

@@ -16,7 +16,7 @@ class MenuItemCardBtn extends StatelessWidget {
     required this.name,
     required this.price,
     required this.imageUrl,
-    this.quantity = 0,
+    this. quantity = 0,
     required this.onAdd,
     this.onRemove,
     this.onTap,
@@ -34,11 +34,9 @@ class MenuItemCardBtn extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
-          
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment. start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
-          
           children: [
             // FIXED IMAGE
             Container(
@@ -49,15 +47,8 @@ class MenuItemCardBtn extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 color: const Color(0xFFF9F9F9),
               ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.restaurant, size: 40, color: Colors.grey),
-              ),
+              child: _buildImage(),
             ),
-
-            //const SizedBox(height: 8),
 
             // NAME (max 2 lines, clipped)
             Text(
@@ -69,10 +60,8 @@ class MenuItemCardBtn extends StatelessWidget {
                 fontWeight: FontWeight.w400,
               ),
               maxLines: 2,
-              overflow: TextOverflow.ellipsis, // ⛔ prevents entering more text
+              overflow: TextOverflow.ellipsis,
             ),
-
-            //const SizedBox(height: 6),
 
             // PRICE
             Text(
@@ -87,17 +76,35 @@ class MenuItemCardBtn extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
 
-             // pushes button to bottom
-            
-            
-            Center(child: _buildQuantityControl()
-            ),
-
-            //const SizedBox(height: 8),
+            Center(child: _buildQuantityControl()),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildImage() {
+    // Check if it's a network URL or asset path
+    if (_isNetworkUrl(imageUrl)) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+        const Icon(Icons.restaurant, size: 40, color: Colors.grey),
+      );
+    } else {
+      // It's an asset image
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+        const Icon(Icons.restaurant, size: 40, color: Colors.grey),
+      );
+    }
+  }
+
+  bool _isNetworkUrl(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
   }
 
   // QUANTITY CONTROL

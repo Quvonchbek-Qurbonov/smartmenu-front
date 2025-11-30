@@ -14,6 +14,8 @@ dependencies:
   go_router: ^14.0.0
   intl: ^0.20.2
   mobile_scanner: ^5.2.3
+  http: ^1.1.0
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -30,7 +32,9 @@ flutter:
       - assets/bottombar/scaner.svg
       - assets/bottombar/smart-home.svg
       - assets/bottombar/user.svg
-
+      - assets/restaurant/
+      - assets/meals/
+      - assets/category/
   # fonts:
   #   - family: Schyler
   #     fonts:
