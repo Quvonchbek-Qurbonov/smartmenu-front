@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:my_flutter_app/core/routes/route_names.dart';
+import 'package:my_flutter_app/screens/qrcode/qrcode_scan.dart';
 
 class MenuSnapHomePage extends StatefulWidget {
   const MenuSnapHomePage({Key? key}) : super(key: key);
@@ -15,7 +18,6 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     {
       'title': '50% OFF',
       'subtitle': 'On your first order',
-      'color': const Color(0xFF8B5CF6),
       'gradient': const LinearGradient(
         colors: [Color(0xFF8B5CF6), Color(0xFF6C5CE7)],
         begin: Alignment.topLeft,
@@ -25,7 +27,6 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     {
       'title': 'Free Delivery',
       'subtitle': 'Orders above \$20',
-      'color': const Color(0xFFE86C6C),
       'gradient': const LinearGradient(
         colors: [Color(0xFFE86C6C), Color(0xFFD85B5B)],
         begin: Alignment.topLeft,
@@ -35,12 +36,56 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     {
       'title': '25% Cashback',
       'subtitle': 'Using Visa Cards',
-      'color': const Color(0xFF4CAF50),
       'gradient': const LinearGradient(
         colors: [Color(0xFF4CAF50), Color(0xFF45A049)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
+    },
+  ];
+
+  final List<Map<String, dynamic>> _restaurants = [
+    {
+      "name": "Pizza Roma",
+      "image": "oqtepalavash.png",
+      "rating": 4.8,
+      "cuisine": "Italian",
+      "deliveryTime": "25-30 min"
+    },
+    {
+      "name": "Sushi House",
+      "image": "oqtepalavash.png",
+      "rating": 4.7,
+      "cuisine": "Japanese",
+      "deliveryTime": "30-35 min"
+    },
+    {
+      "name": "Burger Joint",
+      "image": "oqtepalavash.png",
+      "rating": 4.6,
+      "cuisine": "American",
+      "deliveryTime": "20-25 min"
+    },
+    {
+      "name": "Healthy Bowl",
+      "image": "perfetto.png",
+      "rating": 4.9,
+      "cuisine": "Healthy",
+      "deliveryTime": "15-20 min"
+    },
+    {
+      "name": "BBQ Grill",
+      "image": "oqtepalavash.png",
+      "rating": 4.5,
+      "cuisine": "BBQ",
+      "deliveryTime": "35-40 min"
+    },
+    {
+      "name": "Pasta Corner",
+      "image": "oqtepalavash.png",
+      "rating": 4.4,
+      "cuisine": "Italian",
+      "deliveryTime": "25-30 min"
     },
   ];
 
@@ -52,7 +97,9 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final screenHeight = MediaQuery.of(context).size.height;
+
+  return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -78,79 +125,102 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
               style: TextStyle(
                 color: Color(0xFF131316),
                 fontSize: 18,
-                fontFamily: 'Outfit',
                 fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined,
+                color: Color(0xFF131316)),
+            onPressed: () {
+              // Handle notifications
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.only(bottom: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Discount Ads Carousel
+            const SizedBox(height: 16),
+            // ---------------- CAROUSEL ----------------
             SizedBox(
-              height: 160,
+              height: 150,
               child: PageView.builder(
                 controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
+                onPageChanged: (i) => setState(() => _currentPage = i),
                 itemCount: _discountAds.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _buildDiscountCard(_discountAds[index]),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Page Indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _discountAds.length,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: _currentPage == index ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _currentPage == index
-                        ? const Color(0xFF6C5CE7)
-                        : Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                itemBuilder: (_, i) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildDiscountCard(_discountAds[i]),
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            _buildPageIndicator(),
             const SizedBox(height: 24),
-            // Scan QR Code Card
+
+            // ---------------- QR BUTTON ----------------
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildFeatureCard(
-                context: context,
-                icon: Icons.qr_code_scanner,
-                iconColor: const Color(0xFF6C5CE7),
-                title: 'Scan QR code',
-                description: 'You can see our restaurant menu or pay\nyour order',
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const QRScannerPage(),
-                  //   ),
-                  // );
-                },
+              padding: const EdgeInsets.fromLTRB(48, 16, 16, 16),
+              child: _buildQRCard(context),
+            ),
+            const SizedBox(height: 24),
+
+            // ---------------- POPULAR RESTAURANTS ----------------
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "Popular Restaurants",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF131316),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            // Near Me Card
-      
+
+            // LIST OF RESTAURANTS
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _restaurants.length,
+              itemBuilder: (_, index) {
+                final restaurant = _restaurants[index];
+                return _buildRestaurantCard(
+                  restaurant,
+                  cardHeight: screenHeight * 0.18,
+                );
+              },
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------- WIDGETS ----------------
+
+  Widget _buildPageIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        _discountAds.length,
+        (index) => AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: _currentPage == index ? 24 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: _currentPage == index
+                ? const Color(0xFF6C5CE7)
+                : Colors.grey.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
       ),
     );
@@ -158,164 +228,295 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
 
   Widget _buildDiscountCard(Map<String, dynamic> ad) {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
         gradient: ad['gradient'],
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ad['color'].withOpacity(0.3),
-            blurRadius: 12,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Decorative circles
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "🎉 Special Offer",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          Positioned(
-            left: -30,
-            bottom: -30,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+            const Spacer(),
+            Text(
+              ad['title'],
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 4),
+            Text(
+              ad['subtitle'],
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQRCard(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const QRCodeScanScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          //width: 560,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6C5CE7).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.qr_code_scanner,
+                  size: 48,
+                  color: Color(0xFF6C5CE7),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Scan QR Code",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF131316),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "View the menu or pay your bill instantly",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRestaurantCard(
+    Map<String, dynamic> restaurant, {
+    required double cardHeight,
+  }) {
+    final String imagePath = restaurant["image"];
+    final bool isNetworkImage = imagePath.startsWith('http');
+
+    final Widget imageWidget = isNetworkImage
+        ? Image.network(
+            imagePath,
+            fit: BoxFit.cover,
+            width: 120,
+            height: cardHeight,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 120,
+                height: cardHeight,
+                color: Colors.grey[300],
+                child:
+                    const Icon(Icons.restaurant, size: 40, color: Colors.grey),
+              );
+            },
+          )
+        : Image.asset(
+            'assets/restaurant/$imagePath',
+            fit: BoxFit.cover,
+            width: 120,
+            height: cardHeight,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 120,
+                height: cardHeight,
+                color: Colors.grey[300],
+                child:
+                    const Icon(Icons.restaurant, size: 40, color: Colors.grey),
+              );
+            },
+          );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Navigate to restaurant details
+          },
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            height: cardHeight,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 12,
+                  color: Colors.black.withOpacity(0.08),
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                // IMAGE
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(18),
+                    bottomLeft: Radius.circular(18),
                   ),
-                  child: const Text(
-                    '🎉 Special Offer',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  child: imageWidget,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              restaurant["name"],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF131316),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              restaurant["cuisine"] ?? "Restaurant",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.star,
+                                    color: Colors.amber, size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  restaurant["rating"].toString(),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  ),
+                                const SizedBox(width: 8),
+                                Icon(Icons.access_time,
+                                    size: 14, color: Colors.grey[600]),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    restaurant["deliveryTime"] ?? "30 min",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 36,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              context.pushNamed(
+                                RouteNames.menuName, // Use the name constant
+                                pathParameters: {
+                                  'restaurantId': restaurant['id'],
+                                  'restaurantName': restaurant['name'],
+                                },
+                                extra: {
+                                  'description': restaurant['description'],
+                                  'avatar': restaurant['avatar'],
+                                  'location': restaurant['location'],
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6C5CE7),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              "View Menu",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  ad['title'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontFamily: 'Outfit',
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  ad['subtitle'],
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 16,
-                    fontFamily: 'Outfit',
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: iconColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Title
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF131316),
-                fontSize: 24,
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w600,
-                height: 1.40,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Description
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF70707B),
-                fontSize: 16,
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.w400,
-                height: 1.40,
-              ),
-            ),
-          ],
         ),
       ),
     );
