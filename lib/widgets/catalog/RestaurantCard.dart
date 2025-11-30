@@ -14,6 +14,19 @@ class RestaurantCard extends StatelessWidget {
     this.onTap,
   });
 
+  ImageProvider _getImageProvider() {
+    if (imageUrl.isEmpty) {
+      // Return a placeholder image when no image is provided
+      return const AssetImage('assets/images/placeholder.png');
+    } else if (imageUrl.startsWith('http://') || imageUrl. startsWith('https://')) {
+      // Use NetworkImage for URLs
+      return NetworkImage(imageUrl);
+    } else {
+      // Use AssetImage for local assets
+      return AssetImage(imageUrl);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -22,7 +35,7 @@ class RestaurantCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: SizedBox(
-          width: double.infinity,
+          width: double. infinity,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,13 +46,44 @@ class RestaurantCard extends StatelessWidget {
                 height: 201,
                 clipBehavior: Clip. antiAlias,
                 decoration: ShapeDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
+                ),
+                child: Image(
+                  image: _getImageProvider(),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 201,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Show a fallback widget if image fails to load
+                    return Container(
+                      width: double.infinity,
+                      height: 201,
+                      decoration: BoxDecoration(
+                        color: Colors.grey. shade200,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.restaurant,
+                            size: 48,
+                            color: Colors. grey.shade400,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No Image',
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 12),

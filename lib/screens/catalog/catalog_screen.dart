@@ -251,7 +251,7 @@ class _CatalogPageState extends State<CatalogPage> {
             tags: List<String>.from(restaurant['tags']),
             onTap: () {
               context.pushNamed(
-                RouteNames.menu,
+                RouteNames.menuName,  // Use the name constant
                 pathParameters: {
                   'restaurantId': restaurant['id'],
                   'restaurantName': restaurant['name'],
