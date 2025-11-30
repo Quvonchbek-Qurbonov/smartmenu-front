@@ -33,7 +33,11 @@ flutter:
       - assets/bottombar/smart-home.svg
       - assets/bottombar/user.svg
       - assets/restaurant/
+      - assets/restaurant/maxway/
+      - assets/restaurant/evos/
       - assets/meals/
+      - assets/meals/maxway/
+      - assets/meals/evos/
       - assets/category/
   # fonts:
   #   - family: Schyler

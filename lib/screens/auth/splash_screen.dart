@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Scan.  Order. Enjoy.',
+              'Scan Order Enjoy',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white.withOpacity(0.8),

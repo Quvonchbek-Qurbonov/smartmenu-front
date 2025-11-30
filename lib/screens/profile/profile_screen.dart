@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : const Color(0xFF7C4DFF).withOpacity(0.15),
                         ),
                         child: Icon(
-                          _gender == 'female' ? Icons.female : Icons.male,
+                          _gender == 'female' ? Icons.woman : Icons.man,
                           size: 32,
                           color: _gender == 'female'
                               ? const Color(0xFFE91E63)

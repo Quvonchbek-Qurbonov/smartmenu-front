@@ -197,9 +197,9 @@ class _SelectGenderScreenState extends State<SelectGenderScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildGenderOption('male', 'Male', Icons.male),
+                  _buildGenderOption('male', 'Male', Icons.man),
                   const SizedBox(width: 60),
-                  _buildGenderOption('female', 'Female', Icons.female),
+                  _buildGenderOption('female', 'Female', Icons.woman),
                 ],
               ),
 

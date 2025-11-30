@@ -267,14 +267,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               children: [
                 _buildAvatarOption(
                   index: 0,
-                  icon: Icons.male,
+                  icon: Icons.man,
                   label: 'Male',
                   color: const Color(0xFF7C4DFF),
                 ),
                 const SizedBox(width: 40),
                 _buildAvatarOption(
                   index: 1,
-                  icon: Icons.female,
+                  icon: Icons.woman,
                   label: 'Female',
                   color: const Color(0xFFE91E63),
                 ),
