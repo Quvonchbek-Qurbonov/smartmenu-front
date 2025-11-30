@@ -9,24 +9,24 @@ class OrderDetailPage extends StatelessWidget {
   final String status;
   final int?  tableNumber;
   final List<Map<String, dynamic>>? items;
-  final double?  total;
+  final double? total;
   final String? restaurantAvatar;
   final String? restaurantId;
 
   const OrderDetailPage({
     Key? key,
-    required this. orderId,
-    required this. title,
+    required this.orderId,
+    required this.title,
     required this.status,
-    this.tableNumber,
+    this. tableNumber,
     this.items,
     this.total,
-    this. restaurantAvatar,
+    this.restaurantAvatar,
     this.restaurantId,
   }) : super(key: key);
 
   double _calculateTotal() {
-    if (total != null) return total! ;
+    if (total != null) return total!;
     if (items != null) {
       double sum = 0;
       for (var item in items!) {
@@ -34,7 +34,7 @@ class OrderDetailPage extends StatelessWidget {
         if (item['price'] is double) {
           price = item['price'];
         } else if (item['price'] is int) {
-          price = item['price'].toDouble();
+          price = item['price']. toDouble();
         } else if (item['price'] is String) {
           price = double.tryParse(item['price']. replaceAll('\$', '')) ?? 0;
         }
@@ -46,7 +46,7 @@ class OrderDetailPage extends StatelessWidget {
   }
 
   List<Map<String, dynamic>> _getOrderItems() {
-    if (items != null) return items! ;
+    if (items != null) return items!;
     return [
     {'name': 'Sushi Rainbow Roll', 'price': 45.0, 'quantity': 1},
     {'name': 'Green Salad', 'price': 10.0, 'quantity': 1},
@@ -159,13 +159,13 @@ class OrderDetailPage extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildDetailRow("Order", orderId),
-                          _buildDetailRow("Table", "#${tableNumber ??  12}"),
+                          _buildDetailRow("Table", "#${tableNumber ?? 12}"),
                           const SizedBox(height: 16),
                           const Divider(height: 1),
                           const SizedBox(height: 16),
 
                           // Order items
-                          ... orderItems.map((item) {
+                          ...orderItems.map((item) {
                             final quantity = item['quantity'] ?? 1;
                             final name = item['name'];
                             final price = item['price'];
@@ -173,7 +173,7 @@ class OrderDetailPage extends StatelessWidget {
                               '$name ${quantity}x',
                               _formatPrice(price),
                             );
-                          }).toList(),
+                          }). toList(),
 
                           const SizedBox(height: 16),
                           const Divider(height: 1),
@@ -307,8 +307,9 @@ class OrderDetailPage extends StatelessWidget {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {
+                            // Use 'payment' (route name) instead of RouteNames.payment (route path)
                             context.pushNamed(
-                              RouteNames.payment,
+                              'payment',
                               extra: {
                                 'orderId': orderId,
                                 'totalAmount': orderTotal,
@@ -326,9 +327,9 @@ class OrderDetailPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            "Pay Now",
-                            style: TextStyle(
+                          child: Text(
+                            "Pay Now - ${_formatPrice(orderTotal)}",
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -378,7 +379,7 @@ class OrderDetailPage extends StatelessWidget {
         ),
       );
     }
-    return const Icon(Icons. restaurant, color: Colors.grey);
+    return const Icon(Icons.restaurant, color: Colors.grey);
   }
 
   Color _getStatusColor() {
@@ -399,7 +400,7 @@ class OrderDetailPage extends StatelessWidget {
       case 'Current':
         return const Color(0xFF8B5CF6);
       case 'Paid':
-        return Colors. green;
+        return Colors.green;
       case 'Cancelled':
         return Colors.red;
       default:

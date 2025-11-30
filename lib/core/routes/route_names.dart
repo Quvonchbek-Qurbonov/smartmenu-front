@@ -1,5 +1,5 @@
 class RouteNames {
-  // Auth routes (paths)
+  // Route paths
   static const String splash = '/';
   static const String auth = '/auth';
   static const String signIn = '/sign-in';
@@ -9,8 +9,6 @@ class RouteNames {
   static const String forgotPassword = '/forgot-password';
   static const String otp = '/otp';
   static const String createNewPassword = '/create-new-password';
-
-  // Main app routes (paths)
   static const String home = '/home';
   static const String Home = '/Home';
   static const String profile = '/profile';
@@ -24,6 +22,7 @@ class RouteNames {
   static const String payment = '/payment';
   static const String orders = '/orders';
 
-  // Route names (for pushNamed)
+  // Route names (for use with pushNamed)
   static const String menuName = 'menu';
+  static const String paymentName = 'payment';
 }

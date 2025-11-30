@@ -32,7 +32,7 @@ class SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Success',
+              'Payment Successful! ',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -40,7 +40,7 @@ class SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Your order has been placed successfully',
+              'Your payment has been processed successfully.  Thank you for your order! ',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -60,7 +60,7 @@ class SuccessDialog extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Go to Orders',
+                  'View Orders',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

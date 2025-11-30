@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_flutter_app/screens/orders/orderDetails.dart';
+import 'package:my_flutter_app/services/auth_service.dart';
 
 class CartPage extends StatefulWidget {
   final String restaurantId;
@@ -45,14 +46,14 @@ class _CartPageState extends State<CartPage> {
         ... item,
         'quantity': cart[item['id']] ?? 0,
       };
-    }). toList();
+    }).toList();
   }
 
   double _getItemPrice(dynamic price) {
     if (price is double) return price;
     if (price is int) return price.toDouble();
     if (price is String) {
-      return double.tryParse(price. replaceAll('\$', ''). replaceAll(',', '')) ??  0;
+      return double.tryParse(price. replaceAll('\$', ''). replaceAll(',', '')) ?? 0;
     }
     return 0;
   }
@@ -100,12 +101,12 @@ class _CartPageState extends State<CartPage> {
     } else if (price is String) {
       return price. startsWith('\$') ? price : '\$$price';
     }
-    return '\$0. 00';
+    return '\$0.00';
   }
 
   Future<void> _submitOrder() async {
     if (cart.isEmpty) {
-      ScaffoldMessenger.of(context). showSnackBar(
+      ScaffoldMessenger. of(context).showSnackBar(
         const SnackBar(content: Text('Your cart is empty')),
       );
       return;
@@ -116,6 +117,12 @@ class _CartPageState extends State<CartPage> {
     });
 
     try {
+      // Get user ID from auth service
+      final userId = await AuthService.getUserId();
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
       // Prepare order items
       final orderItems = cartItems.map((item) => {
         'meal_id': int.parse(item['id']),
@@ -123,53 +130,55 @@ class _CartPageState extends State<CartPage> {
         'price': _getItemPrice(item['price']),
       }).toList();
 
-      // TODO: Replace with actual API call when backend is ready
-      // final response = await http.post(
-      //   Uri.parse('$baseUrl/orders'),
-      //   headers: {'Content-Type': 'application/json'},
-      //   body: json.encode({
-      //     'restaurant_id': int.parse(widget.restaurantId),
-      //     'table_number': widget.tableNumber,
-      //     'items': orderItems,
-      //     'total': total,
-      //   }),
-      // );
-      //
-      // if (response.statusCode != 200 && response.statusCode != 201) {
-      //   throw Exception('Failed to place order');
-      // }
-      //
-      // final orderData = json.decode(response. body);
-      // final orderId = orderData['id']. toString();
+      // Prepare request body
+      final requestBody = {
+        'user_id': int.parse(userId),
+        'restaurant_id': widget.restaurantId,
+        'table_number': widget.tableNumber,
+        'items': orderItems,
+      };
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      debugPrint('Submitting order: ${json.encode(requestBody)}');
 
-      // Generate a mock order ID
-      final orderId = 'Order #${DateTime.now().millisecondsSinceEpoch. toString(). substring(7)}';
+      // Make API call with authentication
+      final response = await AuthService.authenticatedPost(
+        '/orders/new',
+        body: requestBody,
+      );
 
-      if (mounted) {
-        // Navigate to order details page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OrderDetailPage(
-              orderId: orderId,
-              title: widget.restaurantName,
-              status: 'Current',
-              // Pass additional data
-              tableNumber: widget.tableNumber,
-              items: cartItems,
-              total: total,
-              restaurantAvatar: widget.restaurantAvatar,
-              restaurantId: widget.restaurantId,
+      debugPrint('Order response status: ${response.statusCode}');
+      debugPrint('Order response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final orderData = json.decode(response. body);
+        final orderId = orderData['id']. toString();
+
+        if (mounted) {
+          // Navigate to order details page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderDetailPage(
+                orderId: 'Order #$orderId',
+                title: widget.restaurantName,
+                status: 'Current',
+                tableNumber: widget.tableNumber,
+                items: cartItems,
+                total: total,
+                restaurantAvatar: widget.restaurantAvatar,
+                restaurantId: widget.restaurantId,
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['detail'] ?? 'Failed to place order');
       }
     } catch (e) {
+      debugPrint('Order submission error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context). showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to place order: $e')),
         );
       }
@@ -187,7 +196,7 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors. white,
         elevation: 0,
         surfaceTintColor: Colors.white,
         leading: IconButton(
@@ -250,7 +259,7 @@ class _CartPageState extends State<CartPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF875BF7),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets. symmetric(horizontal: 32, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -289,7 +298,7 @@ class _CartPageState extends State<CartPage> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        clipBehavior: Clip.antiAlias,
+                        clipBehavior: Clip. antiAlias,
                         child: widget.restaurantAvatar != null
                             ? Image.asset(
                           'assets/restaurant/${widget.restaurantAvatar}',
@@ -320,7 +329,7 @@ class _CartPageState extends State<CartPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green. shade50,
+                                color: Colors.green.shade50,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -515,14 +524,14 @@ class _CartPageState extends State<CartPage> {
                 child: Icon(
                   Icons.delete_outline,
                   size: 20,
-                  color: Colors.red.shade400,
+                  color: Colors. red.shade400,
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius. circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
