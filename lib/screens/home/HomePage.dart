@@ -46,47 +46,19 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
 
   final List<Map<String, dynamic>> _restaurants = [
     {
-      "name": "Pizza Roma",
-      "image": "oqtepalavash.png",
+      "name": "Evos",
+      "image": "evos/evos.jpg",
       "rating": 4.8,
-      "cuisine": "Italian",
-      "deliveryTime": "25-30 min"
-    },
-    {
-      "name": "Sushi House",
-      "image": "oqtepalavash.png",
-      "rating": 4.7,
-      "cuisine": "Japanese",
-      "deliveryTime": "30-35 min"
-    },
-    {
-      "name": "Burger Joint",
-      "image": "oqtepalavash.png",
-      "rating": 4.6,
       "cuisine": "American",
-      "deliveryTime": "20-25 min"
-    },
-    {
-      "name": "Healthy Bowl",
-      "image": "perfetto.png",
-      "rating": 4.9,
-      "cuisine": "Healthy",
-      "deliveryTime": "15-20 min"
-    },
-    {
-      "name": "BBQ Grill",
-      "image": "oqtepalavash.png",
-      "rating": 4.5,
-      "cuisine": "BBQ",
-      "deliveryTime": "35-40 min"
-    },
-    {
-      "name": "Pasta Corner",
-      "image": "oqtepalavash.png",
-      "rating": 4.4,
-      "cuisine": "Italian",
       "deliveryTime": "25-30 min"
     },
+    {
+      "name": "Max Way",
+      "image": "maxway/maxway.png",
+      "rating": 4.7,
+      "cuisine": "Italian",
+      "deliveryTime": "30-35 min"
+    }
   ];
 
   @override
@@ -164,8 +136,9 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
             const SizedBox(height: 24),
 
             // ---------------- QR BUTTON ----------------
+            // ---------------- QR BUTTON ----------------
             Padding(
-              padding: const EdgeInsets.fromLTRB(48, 16, 16, 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // ✅ Equal padding
               child: _buildQRCard(context),
             ),
             const SizedBox(height: 24),
