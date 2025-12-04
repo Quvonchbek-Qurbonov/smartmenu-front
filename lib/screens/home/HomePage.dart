@@ -21,7 +21,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
   // Restaurant data from API
   List<Map<String, dynamic>> _restaurants = [];
   bool isLoading = true;
-  String?  errorMessage;
+  String? errorMessage;
 
   final List<Map<String, dynamic>> _discountAds = [
     {
@@ -38,8 +38,8 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
       'subtitle': 'Orders above \$20',
       'gradient': const LinearGradient(
         colors: [Color(0xFFE86C6C), Color(0xFFD85B5B)],
-        begin: Alignment. topLeft,
-        end: Alignment. bottomRight,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
     },
     {
@@ -78,7 +78,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
       final response = await http.get(Uri.parse(url));
 
       if (response. statusCode == 200) {
-        final List<dynamic> data = json. decode(response.body);
+        final List<dynamic> data = json.decode(response. body);
 
         debugPrint('Loaded ${data.length} restaurants');
 
@@ -205,7 +205,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
               const SizedBox(height: 16),
 
               // LIST OF RESTAURANTS
-              _buildRestaurantsList(screenHeight),
+              _buildRestaurantsList(),
             ],
           ),
         ),
@@ -213,11 +213,11 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     );
   }
 
-  Widget _buildRestaurantsList(double screenHeight) {
+  Widget _buildRestaurantsList() {
     if (isLoading) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: EdgeInsets. all(32.0),
           child: CircularProgressIndicator(
             color: Color(0xFF6C5CE7),
           ),
@@ -260,7 +260,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     if (_restaurants.isEmpty) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets. all(32.0),
+          padding: EdgeInsets.all(32.0),
           child: Text(
             'No restaurants found',
             style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -275,10 +275,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
       itemCount: _restaurants.length,
       itemBuilder: (_, index) {
         final restaurant = _restaurants[index];
-        return _buildRestaurantCard(
-          restaurant,
-          cardHeight: screenHeight * 0.18,
-        );
+        return _buildRestaurantCard(restaurant);
       },
     );
   }
@@ -293,7 +290,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
             (index) => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: _currentPage == index ? 24 : 8,
+          width: _currentPage == index ?  24 : 8,
           height: 8,
           decoration: BoxDecoration(
             color: _currentPage == index
@@ -358,7 +355,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
                   ad['subtitle'],
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white. withOpacity(0.9),
                   ),
                 ),
               ],
@@ -417,7 +414,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
                       'Scan QR Code',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight. w700,
                         color: Color(0xFF131316),
                       ),
                     ),
@@ -444,35 +441,10 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
     );
   }
 
-  Widget _buildRestaurantCard(
-      Map<String, dynamic> restaurant, {
-        required double cardHeight,
-      }) {
+  Widget _buildRestaurantCard(Map<String, dynamic> restaurant) {
     // Build image from avatar (API data)
     final String? avatar = restaurant["avatar"];
     final bool hasAvatar = avatar != null && avatar. isNotEmpty;
-
-    final Widget imageWidget = hasAvatar
-        ? Image.asset(
-      'assets/restaurant/$avatar',
-      fit: BoxFit.cover,
-      width: 120,
-      height: cardHeight,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: 120,
-          height: cardHeight,
-          color: Colors.grey[300],
-          child: const Icon(Icons.restaurant, size: 40, color: Colors.grey),
-        );
-      },
-    )
-        : Container(
-      width: 120,
-      height: cardHeight,
-      color: Colors.grey[300],
-      child: const Icon(Icons.restaurant, size: 40, color: Colors. grey),
-    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -482,7 +454,7 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
           onTap: () {
             // Navigate to menu page
             context.pushNamed(
-              RouteNames. menuName,
+              RouteNames.menuName,
               pathParameters: {
                 'restaurantId': restaurant['id'],
                 'restaurantName': restaurant['name'],
@@ -496,14 +468,14 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
           },
           borderRadius: BorderRadius. circular(18),
           child: Container(
-            height: cardHeight,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              color: Colors. white,
+              borderRadius: BorderRadius. circular(18),
               boxShadow: [
                 BoxShadow(
                   blurRadius: 12,
-                  color: Colors.black. withOpacity(0.08),
+                  color: Colors.black.withOpacity(0.08),
                   offset: const Offset(0, 4),
                 ),
               ],
@@ -512,109 +484,122 @@ class _MenuSnapHomePageState extends State<MenuSnapHomePage> {
               children: [
                 // IMAGE
                 ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius. circular(18),
-                    bottomLeft: Radius. circular(18),
+                  borderRadius: BorderRadius.circular(12),
+                  child: hasAvatar
+                      ? Image.asset(
+                    'assets/restaurant/$avatar',
+                    fit: BoxFit.cover,
+                    width: 100,
+                    height: 100,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.restaurant,
+                            size: 40, color: Colors. grey),
+                      );
+                    },
+                  )
+                      : Container(
+                    width: 100,
+                    height: 100,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.restaurant,
+                        size: 40, color: Colors.grey),
                   ),
-                  child: imageWidget,
                 ),
+                const SizedBox(width: 12),
                 // DETAILS
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              restaurant["name"],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight. w700,
-                                color: Color(0xFF131316),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              restaurant["description"] ?? "Restaurant",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow. ellipsis,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.visibility,
-                                    size: 14, color: Colors. grey[600]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${restaurant["views"]} views',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(Icons.qr_code_scanner,
-                                    size: 14, color: Colors. grey[600]),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${restaurant["scans"]} scans',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment. start,
+                    mainAxisSize: MainAxisSize. min,
+                    children: [
+                      Text(
+                        restaurant["name"],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight. w700,
+                          color: Color(0xFF131316),
                         ),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 36,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              context.pushNamed(
-                                RouteNames.menuName,
-                                pathParameters: {
-                                  'restaurantId': restaurant['id'],
-                                  'restaurantName': restaurant['name'],
-                                },
-                                extra: {
-                                  'description': restaurant['description'],
-                                  'avatar': restaurant['avatar'],
-                                  'location': restaurant['location'],
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6C5CE7),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius. circular(10),
-                              ),
-                              elevation: 0,
+                        maxLines: 1,
+                        overflow: TextOverflow. ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        restaurant["description"] ?? "Restaurant",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.visibility,
+                              size: 12, color: Colors. grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${restaurant["views"]}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
                             ),
-                            child: const Text(
-                              'View Menu',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight. w600,
-                              ),
+                          ),
+                          const SizedBox(width: 10),
+                          Icon(Icons.qr_code_scanner,
+                              size: 12, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${restaurant["scans"]}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors. grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 32,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pushNamed(
+                              RouteNames.menuName,
+                              pathParameters: {
+                                'restaurantId': restaurant['id'],
+                                'restaurantName': restaurant['name'],
+                              },
+                              extra: {
+                                'description': restaurant['description'],
+                                'avatar': restaurant['avatar'],
+                                'location': restaurant['location'],
+                              },
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6C5CE7),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius. circular(8),
+                            ),
+                            elevation: 0,
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: const Text(
+                            'View Menu',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight. w600,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
